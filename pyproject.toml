@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = 'sql_executor'
+version = "0.0.1"
+authors = [
+    { name="Yuriy Kozhev", email="yuriy.kozhev@gmail.com" },
+]
+description = "A SQL client software package, mainly for use in Jupyter Notebook environment"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project-urls]
+"Homepage" = "https://example.org"
