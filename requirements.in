@@ -1,0 +1,2 @@
+pip-tools==6.8.0
+sqlalchemy==1.4.39
