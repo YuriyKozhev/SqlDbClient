@@ -1,14 +1,8 @@
 import inspect
 from datetime import datetime
 import logging
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
-                    level=logging.WARN, datefmt="%Y-%m-%d %H:%M:%S",
-                    handlers=[
-                                logging.FileHandler(f"{'PACKAGE'}.log"),
-                                logging.StreamHandler()
-                            ])
-logger = logging.getLogger()
-logger.warning(f"Custom logger for '{'PACKAGE'}' created")
+
+logger = logging.getLogger(__name__)
 
 
 def method_logifier(method, klass):
