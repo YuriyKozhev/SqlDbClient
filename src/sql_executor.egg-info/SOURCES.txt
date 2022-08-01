@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/sql_executor/__init__.py
+src/sql_executor/log_decorators.py
+src/sql_executor/singleton.py
+src/sql_executor/sql_engine_factory.py
+src/sql_executor.egg-info/PKG-INFO
+src/sql_executor.egg-info/SOURCES.txt
+src/sql_executor.egg-info/dependency_links.txt
+src/sql_executor.egg-info/top_level.txt
