@@ -35,12 +35,13 @@ class DataFrame(TypeDecorator):
 
 mapper_registry = registry()
 
+EXECUTE_SQL_QUERY_TABLE_NAME = 'executed_sql_query'
 
 @mapper_registry.mapped
 @dataclass
 class ExecutedSqlQuery:
     __table__ = Table(
-        'executed_sql_query',
+        EXECUTE_SQL_QUERY_TABLE_NAME,
         mapper_registry.metadata,
         Column('uuid', String, primary_key=True),
         Column('query', String),

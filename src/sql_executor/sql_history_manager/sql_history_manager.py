@@ -1,7 +1,7 @@
 from typing import Optional, Union
 from datetime import datetime
 
-from .executed_sql_query import ExecutedSqlQuery, mapper_registry
+from .executed_sql_query import ExecutedSqlQuery, mapper_registry, EXECUTE_SQL_QUERY_TABLE_NAME
 from ..log_decorators import class_logifier, logger
 from ..singleton import Singleton
 
@@ -53,15 +53,15 @@ class SqlHistoryManager(metaclass=Singleton):
     def calc_size(self) -> pd.DataFrame:
         return self._read(f'''
             SELECT uuid, query, start_time, {self.estimated_size_in_mbs} as estimated_size_in_mbs
-            FROM executed_query
+            FROM {EXECUTE_SQL_QUERY_TABLE_NAME}
         ''')
 
     def _vacuum(self):
-        self._execute('VACUUM executed_query')
+        self._execute('VACUUM')
 
     def delete_records(self, min_start_time: Optional[Union[datetime, str]] = None,
                        max_estimated_size_in_mbs: Optional[float] = None):
-        delete_query = 'DELETE FROM executed_query WHERE '
+        delete_query = f'DELETE FROM {EXECUTE_SQL_QUERY_TABLE_NAME} WHERE '
 
         if min_start_time:
             if max_estimated_size_in_mbs:
