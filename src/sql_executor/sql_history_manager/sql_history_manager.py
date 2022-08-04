@@ -1,23 +1,27 @@
 from typing import Optional, Union
 from datetime import datetime
 
-from .executed_sql_query import ExecutedSqlQuery
+from .executed_sql_query import ExecutedSqlQuery, mapper_registry
 from ..log_decorators import class_logifier, logger
 from ..singleton import Singleton
 
 from sqlalchemy import create_engine, select, text
-from sqlalchemy.orm import registry, Session
+from sqlalchemy.orm import Session
 import pandas as pd
 
 
 @class_logifier(methods=['dump', 'delete_records'])
 class SqlHistoryManager(metaclass=Singleton):
+    estimated_size_in_mbs = '''
+            CAST(length(uuid) + length(query) + length(start_time) + length(finish_time) + length(duration) 
+                + length(result) AS REAL) / 1024 / 1024
+        '''
+
     def __init__(self, history_db_name: str):
         self._engine = create_engine(f'sqlite:///{history_db_name}', echo=False, future=True)
         self._session = Session(self._engine)
 
-        self._mapper_registry = registry()
-        self._mapper_registry.metadata.create_all(self._engine)
+        mapper_registry.metadata.create_all(self._engine)
 
         self._data = self._session.query(ExecutedSqlQuery).all()
 
@@ -37,13 +41,13 @@ class SqlHistoryManager(metaclass=Singleton):
         self._refresh_data()
 
     def _execute(self, query):
-        with self._history_db_engine.connect() as conn:
+        with self._engine.connect() as conn:
             conn.commit()
             conn.execute(text(query))
             conn.commit()
 
     def _read(self, query):
-        with self._history_db_engine.connect() as conn:
+        with self._engine.connect() as conn:
             return pd.read_sql(text(query), conn)
 
     def calc_size(self) -> pd.DataFrame:
