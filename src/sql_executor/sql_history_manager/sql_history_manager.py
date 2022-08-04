@@ -1,8 +1,11 @@
+from typing import Optional, Union
+from datetime import datetime
+
 from .executed_sql_query import ExecutedSqlQuery
-from ..log_decorators import class_logifier
+from ..log_decorators import class_logifier, logger
 from ..singleton import Singleton
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import registry, Session
 import pandas as pd
 
@@ -32,3 +35,43 @@ class SqlHistoryManager(metaclass=Singleton):
         self._session.add(executed_query)
         self._session.commit()
         self._refresh_data()
+
+    def _execute(self, query):
+        with self._history_db_engine.connect() as conn:
+            conn.commit()
+            conn.execute(text(query))
+            conn.commit()
+
+    def _read(self, query):
+        with self._history_db_engine.connect() as conn:
+            return pd.read_sql(text(query), conn)
+
+    def calc_size(self) -> pd.DataFrame:
+        return self._read(f'''
+            SELECT uuid, query, start_time, {self.estimated_size_in_mbs} as estimated_size_in_mbs
+            FROM executed_query
+        ''')
+
+    def _vacuum(self):
+        self._execute('VACUUM executed_query')
+
+    def delete_records(self, min_start_time: Optional[Union[datetime, str]] = None,
+                       max_estimated_size_in_mbs: Optional[float] = None):
+        delete_query = 'DELETE FROM executed_query WHERE '
+
+        if min_start_time:
+            if max_estimated_size_in_mbs:
+                delete_query += f"""
+                    start_time < '{str(min_start_time)}' AND
+                    {self.estimated_size_in_mbs} > {max_estimated_size_in_mbs}
+                """
+            else:
+                delete_query += f"""start_time < '{str(min_start_time)}'"""
+        else:
+            if max_estimated_size_in_mbs:
+                delete_query += f"""{self.estimated_size_in_mbs} > {max_estimated_size_in_mbs}"""
+            else:
+                raise ValueError('Both arguments are None')
+        logger.warning(f'Sqlite executing:\n{delete_query}')
+        self._execute(delete_query)
+        self._vacuum()
