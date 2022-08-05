@@ -17,9 +17,9 @@ def full_display(self, cols=True, rows=True, width=False):
     max_columns = full_display_config['display.max_columns']
     max_colwidth = full_display_config['display.max_colwidth']
 
-    if self.shape[0] > max_rows:
+    if rows and self.shape[0] > max_rows:
         raise TooBigToDisplayException(f'DataFrame has too many rows: {self.shape[0]} (> {max_rows})')
-    if self.shape[1] > max_columns:
+    if cols and self.shape[1] > max_columns:
         raise TooBigToDisplayException(f'DataFrame has too many columns: {self.shape[1]} (> {max_columns})')
 
     cols_num = max_columns if cols else pd.get_option("display.max_columns")
