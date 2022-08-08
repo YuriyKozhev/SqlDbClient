@@ -1,0 +1,7 @@
+pandas
+sqlalchemy
+
+[jupyter]
+jupyter
+notebook
+ipykernel
