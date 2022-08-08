@@ -1,2 +1,5 @@
 pip-tools==6.8.0
 sqlalchemy==1.4.39
+psycopg2-binary==2.9.3
+ipython==8.4.0
+pandas==1.4.3
