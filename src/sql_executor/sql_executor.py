@@ -114,3 +114,15 @@ class SqlExecutor(SqlTransactionManager):
         if filtered.empty:
             raise ValueError(f'UUID {uuid} not present in history')
         return filtered.result.iloc[0]
+
+    def peek_table(self, table_fullname: Optional[str] = None,
+                   name: Optional[str] = None,
+                   schema: Optional[str] = None,
+                   rows_to_peek: int = 5) -> pd.DataFrame:
+        if table_fullname is None:
+            table_fullname = f'"{schema}"."{name}"'
+
+        return self.read_query(f'''
+            SELECT * FROM {table_fullname}
+            LIMIT {rows_to_peek}
+        ''')
