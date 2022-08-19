@@ -62,12 +62,12 @@ class SqlExecutor(SqlTransactionManager):
 
         query = self._prepare_query(query, method)
 
+        result = None
         start_time = datetime.now()
         if method == self.METHOD_READ:
             result = pd.read_sql(query, connection)
         elif method == self.METHOD_EXECUTE:
             connection.execute(query)
-            result = pd.DataFrame()
         else:
             raise ValueError(f'Unrecognized method "{method}"')
         finish_time = datetime.now()
@@ -76,9 +76,9 @@ class SqlExecutor(SqlTransactionManager):
             connection.close()
 
         executed_query = ExecutedSqlQuery(query=query.text, start_time=start_time,
-                                          finish_time=finish_time, result=result)
+                                          finish_time=finish_time)
         logger.warning('Executed: ' + str(executed_query))
-        self._history_manager.dump(executed_query)
+        self._history_manager.dump(executed_query, result)
 
         return result
 
@@ -101,19 +101,17 @@ class SqlExecutor(SqlTransactionManager):
 
     @property
     def history(self):
-        return self._history_manager.data
+        return self._history_manager.get_data()
 
     @property
     def last_result(self):
-        if self.history.empty:
-            raise ValueError(f'History empty')
-        return self.history.iloc[-1].result
+        raise NotImplementedError()
+
+    def get_result(self, uuid: str, reload: bool = False):
+        return self._history_manager.get_result(uuid, reload)
 
     def __getitem__(self, uuid: str):
-        filtered = self.history[self.history.uuid == uuid]
-        if filtered.empty:
-            raise ValueError(f'UUID {uuid} not present in history')
-        return filtered.result.iloc[0]
+        return self.get_result(uuid)
 
     def peek_table(self, table_fullname: Optional[str] = None,
                    name: Optional[str] = None,
