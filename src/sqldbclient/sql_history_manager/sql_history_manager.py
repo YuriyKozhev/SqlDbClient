@@ -15,7 +15,7 @@ from ..singleton import Singleton
 class SqlHistoryManager(metaclass=Singleton):
 
     def __init__(self, history_db_name: str) -> None:
-        self._engine = create_engine(f'sqlite:///{history_db_name}', echo=False, future=True)
+        self._engine = create_engine(f'sqlite:///{history_db_name}')
         self._session = Session(self._engine)
 
         metadata.create_all(self._engine)
