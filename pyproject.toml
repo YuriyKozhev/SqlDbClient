@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "pandas",
     "sqlalchemy",
+    "sqlparse"
 ]
 
 [project-urls]
