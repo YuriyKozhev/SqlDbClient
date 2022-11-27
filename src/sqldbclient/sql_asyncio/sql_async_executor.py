@@ -1,5 +1,5 @@
-from ..log_decorators import class_logifier
-from ..singleton import Singleton
+from sqldbclient.utils.log_decorators import class_logifier
+from sqldbclient.utils.singleton import Singleton
 
 from sqlalchemy import text
 import pandas as pd

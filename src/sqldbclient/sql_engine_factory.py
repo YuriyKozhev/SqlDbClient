@@ -1,8 +1,8 @@
 from sqlalchemy.engine.base import Engine
 import functools
 from sqlalchemy import create_engine
-from .log_decorators import method_logifier, class_logifier
-from .singleton import Singleton
+from sqldbclient.utils.log_decorators import method_logifier, class_logifier
+from sqldbclient.utils.singleton import Singleton
 
 
 @class_logifier(['make_engine'])

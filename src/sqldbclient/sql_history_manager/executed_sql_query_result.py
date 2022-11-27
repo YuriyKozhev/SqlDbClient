@@ -8,7 +8,7 @@ from sqlalchemy import Column, Table
 from sqlalchemy import TypeDecorator, String
 
 from .orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
-from ..utils import parse_dates
+from ..utils.pandas.parse_dates import parse_dates
 
 
 class DataFrame(TypeDecorator):

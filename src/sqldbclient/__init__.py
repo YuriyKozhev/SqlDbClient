@@ -17,3 +17,5 @@ Here are just a few of the things that sql-executor does well:
 """
 
 from .sql_executor import SqlExecutor
+from .utils import pandas as pandas_tools
+

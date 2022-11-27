@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from sqlalchemy.engine.base import Engine, RootTransaction
-from .log_decorators import logger
+from sqldbclient.utils.log_decorators import logger
 
 
 class SqlTransactionManager:

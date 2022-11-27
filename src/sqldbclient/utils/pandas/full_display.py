@@ -1,5 +1,10 @@
 import pandas as pd
-from IPython.display import display
+
+try:
+    from IPython.display import display
+except ImportError as e:
+    raise ImportError('Pandas DataFrame full_display method available only for Jupyter environment')
+
 
 full_display_config = {
     'display.max_rows': 1_000,

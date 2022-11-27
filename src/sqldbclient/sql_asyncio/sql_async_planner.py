@@ -1,4 +1,4 @@
-from ..log_decorators import class_logifier
+from sqldbclient.utils.log_decorators import class_logifier
 from .sql_async_executor import SqlAsyncExecutor
 from .async_task_instance import AsyncTaskInstance
 
