@@ -11,7 +11,7 @@ dependencies = (
 
 setuptools.setup(
     name="sql_executor",
-    version="0.0.1",
+    version="0.0.2",
     author="Yuriy Kozhev",
     author_email="yuriy.kozhev@gmail.com",
     description="A SQL client software package, mainly for use in Jupyter Notebook environment",
