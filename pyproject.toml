@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'sql_executor'
-version = "0.0.3"
+version = "0.0.1"
 authors = [
     { name="Yuriy Kozhev", email="yuriy.kozhev@gmail.com" },
 ]

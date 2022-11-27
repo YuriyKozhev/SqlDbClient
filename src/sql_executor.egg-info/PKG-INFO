@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: sql-executor
-Version: 0.0.3
+Version: 0.0.1
 Summary: A SQL client software package, mainly for use in Jupyter Notebook environment
 Home-page: https://example.com
 Author: Yuriy Kozhev
