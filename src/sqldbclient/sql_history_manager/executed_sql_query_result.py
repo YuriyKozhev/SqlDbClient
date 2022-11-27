@@ -7,7 +7,7 @@ import pandas as pd
 from sqlalchemy import Column, Table
 from sqlalchemy import TypeDecorator, String
 
-from .config import mapper_registry, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
+from .orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
 from ..utils import parse_dates
 
 
@@ -38,21 +38,24 @@ class DataTypes(TypeDecorator):
         return json.loads(value)
 
 
-@mapper_registry.mapped
-@dataclass
-class ExecutedSqlQueryResult:
-    __table__ = Table(
+executed_sql_query_result = Table(
         EXECUTED_SQL_QUERY_RESULT_TABLE_NAME,
-        mapper_registry.metadata,
+        metadata,
         Column('uuid', String, primary_key=True),
         Column('dataframe', DataFrame),
         Column('datatypes', DataTypes),
         extend_existing=True,
-    )
+)
 
+
+@dataclass
+class ExecutedSqlQueryResult:
     uuid: str
     dataframe: pd.DataFrame = field(repr=False)
     datatypes: List[str] = field(init=False)
 
     def __post_init__(self):
         self.datatypes = [d.name for d in self.dataframe.dtypes]
+
+
+orm_map(ExecutedSqlQueryResult, executed_sql_query_result)

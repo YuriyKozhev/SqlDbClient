@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from .config import mapper_registry
+from .orm_config import metadata
 from .executed_sql_query import ExecutedSqlQuery
 from .executed_sql_query_result import ExecutedSqlQueryResult
 from ..log_decorators import class_logifier
@@ -18,7 +18,7 @@ class SqlHistoryManager(metaclass=Singleton):
         self._engine = create_engine(f'sqlite:///{history_db_name}', echo=False, future=True)
         self._session = Session(self._engine)
 
-        mapper_registry.metadata.create_all(self._engine)
+        metadata.create_all(self._engine)
 
         self._query_results = {}
 
