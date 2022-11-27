@@ -3,3 +3,6 @@ venv
 dist
 TODO
 src/sqldbclient.egg-info
+*.ipynb
+*.db
+*.log
