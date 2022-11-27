@@ -1,4 +1,4 @@
-# Sql Executor
+# Sql DB Client
 
 Provides additional functionalities to work with DBMS utilizing mainly 2 powerful packages sqlalchemy and pandas.
 

@@ -2,3 +2,4 @@ venv
 .idea
 dist
 TODO
+src/sqldbclient.egg-info

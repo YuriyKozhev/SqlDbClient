@@ -10,7 +10,7 @@ dependencies = (
 )
 
 setuptools.setup(
-    name="sql_executor",
+    name="sqldbclient",
     version="0.0.1",
     author="Yuriy Kozhev",
     author_email="yuriy.kozhev@gmail.com",
