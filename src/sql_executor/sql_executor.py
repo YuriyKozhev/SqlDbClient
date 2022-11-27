@@ -12,6 +12,7 @@ from .log_decorators import class_logifier, logger
 from .sql_transaction_manager import SqlTransactionManager
 from .sql_history_manager.sql_history_manager import SqlHistoryManager
 from .sql_history_manager.executed_sql_query import ExecutedSqlQuery
+from .utils import parse_dates
 
 
 @class_logifier(methods=['read_query', 'execute_query'])
@@ -66,6 +67,7 @@ class SqlExecutor(SqlTransactionManager):
         start_time = datetime.now()
         if method == self.METHOD_READ:
             result = pd.read_sql(query, connection)
+            result = parse_dates(result)
         elif method == self.METHOD_EXECUTE:
             connection.execute(query)
         else:

@@ -8,6 +8,7 @@ from sqlalchemy import Column, Table
 from sqlalchemy import TypeDecorator, String
 
 from .config import mapper_registry, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
+from ..utils import parse_dates
 
 
 class DataFrame(TypeDecorator):
@@ -20,7 +21,9 @@ class DataFrame(TypeDecorator):
 
     def process_result_value(self, value, dialect):
         buffer = io.StringIO(value)
-        return pd.read_csv(buffer, sep='\x1F')  # noqa
+        result = pd.read_csv(buffer, sep='\x1F')  # noqa
+        result = parse_dates(result)
+        return result
 
 
 class DataTypes(TypeDecorator):
