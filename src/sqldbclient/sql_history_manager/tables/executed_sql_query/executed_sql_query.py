@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import String, DateTime, Interval
 from sqlalchemy import Table, Column
 
-from .orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_TABLE_NAME
+from ...orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_TABLE_NAME
 
 
 executed_sql_query = Table(

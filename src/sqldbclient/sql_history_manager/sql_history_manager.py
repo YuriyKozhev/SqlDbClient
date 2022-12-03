@@ -5,8 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from .orm_config import metadata
-from .executed_sql_query import ExecutedSqlQuery
-from .executed_sql_query_result import ExecutedSqlQueryResult
+from .tables.executed_sql_query.executed_sql_query import ExecutedSqlQuery
+from .tables.executed_sql_query_result.executed_sql_query_result import ExecutedSqlQueryResult
 from sqldbclient.utils.log_decorators import class_logifier
 from sqldbclient.utils.singleton import Singleton
 

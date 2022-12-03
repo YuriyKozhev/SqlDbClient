@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqldbclient.utils.log_decorators import class_logifier, logger
 from .sql_transaction_manager import SqlTransactionManager
 from .sql_history_manager.sql_history_manager import SqlHistoryManager
-from .sql_history_manager.executed_sql_query import ExecutedSqlQuery
+from sqldbclient.sql_history_manager.tables.executed_sql_query.executed_sql_query import ExecutedSqlQuery
 from .utils.pandas.parse_dates import parse_dates
 
 
