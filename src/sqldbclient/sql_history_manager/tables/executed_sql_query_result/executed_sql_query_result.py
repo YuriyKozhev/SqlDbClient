@@ -2,21 +2,21 @@ from dataclasses import field, dataclass
 from typing import List
 
 import pandas as pd
-from sqlalchemy import Column, Table
+from sqlalchemy import Column, Table, ForeignKey
 from sqlalchemy import String
 
-from ...orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
+from ...orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_TABLE_NAME, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
 from .custom_sqlalchemy_types.data_types import DataTypes
 from .custom_sqlalchemy_types.data_frame import DataFrame
 
 
 executed_sql_query_result = Table(
-        EXECUTED_SQL_QUERY_RESULT_TABLE_NAME,
-        metadata,
-        Column('uuid', String, primary_key=True),
-        Column('dataframe', DataFrame),
-        Column('datatypes', DataTypes),
-        extend_existing=True,
+    EXECUTED_SQL_QUERY_RESULT_TABLE_NAME,
+    metadata,
+    Column('uuid', String, ForeignKey(f"{EXECUTED_SQL_QUERY_TABLE_NAME}.uuid"),  primary_key=True),
+    Column('dataframe', DataFrame),
+    Column('datatypes', DataTypes),
+    extend_existing=True,
 )
 
 
