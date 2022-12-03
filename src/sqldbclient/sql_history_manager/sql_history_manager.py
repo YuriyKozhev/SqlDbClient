@@ -1,7 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Union
+from datetime import datetime
 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 from .orm_config import metadata
@@ -66,49 +67,28 @@ class SqlHistoryManager(metaclass=Singleton):
 
         self._session.commit()
 
-    # TODO section
+    def delete_results(self,
+                       up_to_start_time: Optional[Union[datetime, str]] = None,
+                       over_estimated_size: Optional[int] = None,
+                       with_uuids: Optional[List[str]] = None):
+        if up_to_start_time is None and over_estimated_size is None and with_uuids is None:
+            raise ValueError('At least one condition should be specified')
 
-    # estimated_size_in_mbs = '''
-    #         CAST(length(uuid) + length(query) + length(start_time) + length(finish_time) + length(duration)
-    #             + length(result) AS REAL) / 1024 / 1024
-    #     '''
-    #
-    # def _execute(self, query):
-    #     with self._engine.connect() as conn:
-    #         conn.commit()
-    #         conn.execute(text(query))
-    #         conn.commit()
-    #
-    # def _read(self, query):
-    #     with self._engine.connect() as conn:
-    #         return pd.read_sql(text(query), conn)
-    #
-    # def calc_size(self) -> pd.DataFrame:
-    #     return self._read(f'''
-    #         SELECT uuid, query, start_time, {self.estimated_size_in_mbs} as estimated_size_in_mbs
-    #         FROM {EXECUTED_SQL_QUERY_TABLE_NAME}
-    #     ''')
-    #
-    # def _vacuum(self):
-    #     self._execute('VACUUM')
-    #
-    # def delete_records(self, min_start_time: Optional[Union[datetime, str]] = None,
-    #                    max_estimated_size_in_mbs: Optional[float] = None):
-    #     delete_query = f'DELETE FROM {EXECUTED_SQL_QUERY_TABLE_NAME} WHERE '
-    #
-    #     if min_start_time:
-    #         if max_estimated_size_in_mbs:
-    #             delete_query += f"""
-    #                 start_time < '{str(min_start_time)}' AND
-    #                 {self.estimated_size_in_mbs} > {max_estimated_size_in_mbs}
-    #             """
-    #         else:
-    #             delete_query += f"""start_time < '{str(min_start_time)}'"""
-    #     else:
-    #         if max_estimated_size_in_mbs:
-    #             delete_query += f"""{self.estimated_size_in_mbs} > {max_estimated_size_in_mbs}"""
-    #         else:
-    #             raise ValueError('Both arguments are None')
-    #     logger.warning(f'Sqlite executing:\n{delete_query}')
-    #     self._execute(delete_query)
-    #     self._vacuum()
+        selected_queries = self._session.query(ExecutedSqlQueryResult.uuid).join(
+            ExecutedSqlQuery,
+            ExecutedSqlQueryResult.uuid == ExecutedSqlQuery.uuid
+        )
+        if up_to_start_time is not None:
+            selected_queries = selected_queries.filter(ExecutedSqlQuery.start_time < up_to_start_time)
+        if over_estimated_size is not None:
+            selected_queries = selected_queries.filter(ExecutedSqlQueryResult.estimated_size > over_estimated_size)
+        if with_uuids is not None:
+            selected_queries = selected_queries.filter(ExecutedSqlQueryResult.uuid.in_(with_uuids))
+
+        queries_to_delete = self._session.query(ExecutedSqlQueryResult).filter(
+            ExecutedSqlQueryResult.uuid.in_(selected_queries.subquery())
+        )
+        queries_to_delete.delete(synchronize_session=False)
+        self._session.commit()
+
+        self._session.execute(text('VACUUM'))  # free space after deletion
