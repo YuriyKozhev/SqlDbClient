@@ -25,9 +25,12 @@ class ExecutedSqlQueryResult:
     uuid: str
     dataframe: pd.DataFrame = field(repr=False)
     datatypes: List[str] = field(init=False)
+    estimated_size: int = field(init=False)
 
     def __post_init__(self):
         self.datatypes = [d.name for d in self.dataframe.dtypes]
+        # estimated dataframe size in bytes
+        self.estimated_size = self.dataframe.memory_usage(deep=True).sum()
 
 
 orm_map(ExecutedSqlQueryResult, executed_sql_query_result)
