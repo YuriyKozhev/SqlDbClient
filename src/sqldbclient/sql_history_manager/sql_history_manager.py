@@ -9,9 +9,10 @@ from .tables.executed_sql_query.executed_sql_query import ExecutedSqlQuery
 from .tables.executed_sql_query_result.executed_sql_query_result import ExecutedSqlQueryResult
 from sqldbclient.utils.log_decorators import class_logifier
 from sqldbclient.utils.singleton import Singleton
+from sqldbclient.utils.deprecated import deprecated
 
 
-@class_logifier(methods=['dump', 'get_result', 'get_data'])
+@class_logifier(methods=['dump', 'get_result', 'get_data', 'get_queries'])
 class SqlHistoryManager(metaclass=Singleton):
 
     def __init__(self, history_db_name: str) -> None:
@@ -20,37 +21,38 @@ class SqlHistoryManager(metaclass=Singleton):
 
         metadata.create_all(self._engine)
 
-        self._query_results = {}
+        self._executed_sql_query_results = {}
 
     @property
-    def _executed_queries(self) -> List[ExecutedSqlQuery]:
+    def _executed_sql_queries(self) -> List[ExecutedSqlQuery]:
         return self._session.query(ExecutedSqlQuery).all()
 
-    def get_data(self) -> pd.DataFrame:
-        data = pd.DataFrame(self._executed_queries)
-        return data
-
     @staticmethod
-    def _parse_result(result: ExecutedSqlQueryResult) -> pd.DataFrame:
+    def _parse_executed_sql_query_result(result: ExecutedSqlQueryResult) -> pd.DataFrame:
         df = result.dataframe
         for i, col in enumerate(df.columns):
             df[col] = df[col].astype(result.datatypes[i])
         return df
 
-    def get_result(self, uuid: str, reload: bool = False) -> pd.DataFrame:
-        if not reload and uuid in self._query_results:
-            return self._query_results[uuid]
+    @deprecated
+    def get_data(self) -> pd.DataFrame:
+        return self.get_queries()
 
-        result = self._session.query(ExecutedSqlQueryResult).filter(
-            ExecutedSqlQueryResult.uuid == uuid
-        ).first()
+    def get_queries(self) -> pd.DataFrame:
+        return pd.DataFrame(self._executed_sql_queries)
+
+    def get_result(self, uuid: str, reload: bool = False) -> pd.DataFrame:
+        if not reload and uuid in self._executed_sql_query_results:
+            return self._executed_sql_query_results[uuid]
+
+        result = self._session.query(ExecutedSqlQueryResult).filter_by(uuid=uuid).first()
 
         if result is None:
             raise ValueError(f'No result found for uuid = {uuid}')
 
         self._session.expunge(result)
-        df = self._parse_result(result)
-        self._query_results[uuid] = df
+        df = self._parse_executed_sql_query_result(result)
+        self._executed_sql_query_results[uuid] = df
         return df
 
     def dump(self, executed_query: ExecutedSqlQuery, df: Optional[pd.DataFrame] = None) -> None:
@@ -60,7 +62,7 @@ class SqlHistoryManager(metaclass=Singleton):
             uuid = executed_query.uuid
             result = ExecutedSqlQueryResult(uuid=uuid, dataframe=df)
             self._session.add(result)
-            self._query_results[uuid] = df
+            self._executed_sql_query_results[uuid] = df
 
         self._session.commit()
 
