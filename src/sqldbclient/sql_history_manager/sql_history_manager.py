@@ -41,7 +41,7 @@ class SqlHistoryManager(metaclass=Singleton):
         if not reload and uuid in self._query_results:
             return self._query_results[uuid]
 
-        result = self._session.query(ExecutedSqlQueryResult).where(
+        result = self._session.query(ExecutedSqlQueryResult).filter(
             ExecutedSqlQueryResult.uuid == uuid
         ).first()
 
