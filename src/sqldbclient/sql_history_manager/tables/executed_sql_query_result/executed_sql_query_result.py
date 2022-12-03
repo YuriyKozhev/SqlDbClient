@@ -6,8 +6,8 @@ from sqlalchemy import Column, Table
 from sqlalchemy import String
 
 from ...orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_RESULT_TABLE_NAME
-from custom_sqlalchemy_types.data_types import DataTypes
-from custom_sqlalchemy_types.data_frame import DataFrame
+from .custom_sqlalchemy_types.data_types import DataTypes
+from .custom_sqlalchemy_types.data_frame import DataFrame
 
 
 executed_sql_query_result = Table(

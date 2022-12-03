@@ -1,6 +1,7 @@
 import io
 
 from sqlalchemy import TypeDecorator, String
+import pandas as pd
 
 from sqldbclient.utils.pandas.parse_dates import parse_dates
 
