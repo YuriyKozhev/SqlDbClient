@@ -12,7 +12,7 @@ from sqldbclient.sql_query_preparator.prepared_sql_query import PreparedSqlQuery
 class SqlQueryPreparator:
     LIMIT_REGEX = r'LIMIT\s*(\d*)$'
 
-    def __init__(self, limit_nrows: Optional[int]):
+    def __init__(self, limit_nrows: int):
         self._limit_nrows = limit_nrows
 
     def _get_limit(self, query_text: str) -> Optional[int]:
@@ -21,21 +21,23 @@ class SqlQueryPreparator:
             return None
         return int(limit[0])
 
-    def _add_limit(self, query_text: str) -> str:
+    def _add_limit(self, query_text: str, limit_nrows: Optional[int] = None) -> str:
+        if not limit_nrows:
+            limit_nrows = self._limit_nrows
         limit = self._get_limit(query_text)
         if not limit:
-            logger.warning(f'SELECT query will be limited to {self._limit_nrows}')
-            query_text += f' LIMIT {self._limit_nrows}'
-        elif limit > self._limit_nrows:
+            logger.warning(f'SELECT query will be limited to {limit_nrows}')
+            query_text += f' LIMIT {limit_nrows}'
+        elif limit > limit_nrows:
             logger.warning(
-                f'SELECT query limit will be reduced from {limit} to {self._limit_nrows}'
+                f'SELECT query limit will be reduced from {limit} to {limit_nrows}'
             )
             query_text = re.sub(
-                self.LIMIT_REGEX, f' LIMIT {self._limit_nrows}', query_text, flags=re.IGNORECASE
+                self.LIMIT_REGEX, f' LIMIT {limit_nrows}', query_text, flags=re.IGNORECASE
             )
         return query_text
 
-    def prepare(self, query: Union[TextClause, str]) -> PreparedSqlQuery:
+    def prepare(self, query: Union[TextClause, str], limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
         if isinstance(query, TextClause):
             query_text = query.text
         else:
@@ -49,8 +51,8 @@ class SqlQueryPreparator:
 
         query_text = query_text.strip()
         query_text = sqlparse.format(query_text, reindent=True, keyword_case='upper')
-        if self._limit_nrows and query_type == 'SELECT':
-            query_text = self._add_limit(query_text)
+        if (self._limit_nrows or limit_nrows) and query_type == 'SELECT':
+            query_text = self._add_limit(query_text, limit_nrows)
 
         prepared_sql_query = PreparedSqlQuery(
             text=query_text,
