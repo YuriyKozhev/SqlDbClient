@@ -16,14 +16,14 @@ from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import Incor
 
 
 @class_logifier(methods=['execute'])
-class SqlExecutor(SqlTransactionManager):
+class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def __init__(self,
                  engine: Engine,
                  max_rows_read: int = 10_000,
                  history_db_name: str = 'sql_executor_history_v1.db'):
-        super().__init__(engine)
-        self._history_manager = SqlHistoryManager(history_db_name)
-        self._query_preparator = SqlQueryPreparator(max_rows_read)
+        SqlTransactionManager.__init__(self, engine)
+        SqlQueryPreparator.__init__(self, max_rows_read)
+        SqlHistoryManager.__init__(self, history_db_name)
 
     def _do_query_execution(
             self,
@@ -31,8 +31,8 @@ class SqlExecutor(SqlTransactionManager):
             max_rows_read: Optional[int] = None,
             outside_transaction: bool = False
     ) -> Tuple[Optional[pd.DataFrame], datetime, datetime]:
-        connection = self._get_connection(outside_transaction=outside_transaction)
-        prepared_sql_query = self._query_preparator.prepare(query, max_rows_read)
+        connection = super()._get_connection(outside_transaction=outside_transaction)
+        prepared_sql_query = super().prepare(query, max_rows_read)
 
         start_time = datetime.now()
         result = None
@@ -45,7 +45,7 @@ class SqlExecutor(SqlTransactionManager):
             connection.execute(prepared_sql_query.text_sa_clause)
         finish_time = datetime.now()
 
-        if not self._is_in_transaction:
+        if not super()._is_in_transaction:
             connection.close()
 
         return result, start_time, finish_time
@@ -62,7 +62,7 @@ class SqlExecutor(SqlTransactionManager):
             finish_time=finish_time
         )
         logger.warning('Executed: ' + str(executed_query))
-        self._history_manager.dump(executed_query, result)
+        super().dump(executed_query, result)
         return result
 
     @deprecated
@@ -72,19 +72,3 @@ class SqlExecutor(SqlTransactionManager):
     @deprecated
     def execute_query(self, query: Union[TextClause, str], outside_transaction: bool = False) -> Optional[pd.DataFrame]:
         return self.execute(query, outside_transaction)
-
-    @property
-    def history(self) -> pd.DataFrame:
-        return self._history_manager.get_data()
-
-    @property
-    def last_result(self):
-        raise NotImplementedError()
-
-    def get_result(self, uuid: str, reload: bool = False):
-        return self._history_manager.get_result(uuid, reload)
-
-    def __getitem__(self, uuid: str):
-        return self.get_result(uuid)
-
-
