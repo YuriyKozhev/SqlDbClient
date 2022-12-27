@@ -1,41 +1,56 @@
 from typing import Optional
-from datetime import datetime
+import time
 from sqlalchemy.engine.base import Engine, RootTransaction
 from sqldbclient.utils.log_decorators import logger
+from sqldbclient.utils.deprecated import deprecated
+from sqldbclient.sql_transaction_manager.not_in_transaction_exception import NotInTransActionException
 
 
 class SqlTransactionManager:
     def __init__(self, engine: Engine):
         self._engine = engine
-        self._is_in_transaction: bool = False
         self._transaction: Optional[RootTransaction] = None
-        self._transaction_start: Optional[datetime] = None
+        self._start: Optional[float] = None
+
+    @property
+    def _is_in_transaction(self) -> bool:
+        if self._transaction is None:
+            return False
+        return self._transaction.is_active
 
     def __enter__(self):
         logger.warning(f'Starting transaction')
-        self._transaction_start = datetime.now()
-        self._is_in_transaction = True
+        self._start = time.perf_counter()
         self._transaction = self._engine.connect().begin()
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):
-        finish = datetime.now().replace(microsecond=self._transaction_start.microsecond)
-        logger.warning(f'Exiting transaction, duration={finish - self._transaction_start} seconds')
-        self._transaction.rollback()
+        finish = time.perf_counter()
+        logger.warning(f'Exiting transaction, duration={finish - self._start:0.2f} seconds')
+        if self._is_in_transaction:
+            self.rollback()
         self._transaction.connection.close()
-        self._is_in_transaction = False
 
+    def commit(self):
+        if not self._is_in_transaction:
+            raise NotInTransActionException()
+        self._transaction.commit()
+        logger.warning(f'Transaction committed')
+
+    def rollback(self):
+        if not self._is_in_transaction:
+            raise NotInTransActionException()
+        self._transaction.rollback()
+        logger.warning(f'Transaction rolled back')
+
+    @deprecated
     def start_transaction(self):
         return self
 
+    @deprecated
     def commit_transaction(self):
-        if not self._is_in_transaction:
-            raise Exception("Not in transaction")
-        logger.warning(f'Transaction committed')
-        self._transaction.commit()
+        return self.commit()
 
+    @deprecated
     def rollback_transaction(self):
-        if not self._is_in_transaction:
-            raise Exception("Not in transaction")
-        logger.warning(f'Transaction rolled back')
-        self._transaction.rollback()
+        return self.rollback()
