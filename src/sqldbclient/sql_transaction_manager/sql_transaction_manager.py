@@ -57,10 +57,6 @@ class SqlTransactionManager:
         logger.warning(f'Transaction rolled back')
 
     @deprecated
-    def start_transaction(self):
-        return self
-
-    @deprecated
     def commit_transaction(self):
         return self.commit()
 
