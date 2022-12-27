@@ -31,6 +31,8 @@ class SqlTransactionManager:
         return connection
 
     def __enter__(self):
+        if self._is_in_transaction:
+            raise NotImplementedError('Nested transaction are not supported yet')
         logger.warning(f'Starting transaction')
         self._start = time.perf_counter()
         connection = self._get_connection()
