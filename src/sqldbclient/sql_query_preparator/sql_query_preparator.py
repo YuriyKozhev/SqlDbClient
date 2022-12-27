@@ -1,8 +1,7 @@
-from typing import Union, Optional
+from typing import Optional
 import re
 
 import sqlparse
-from sqlalchemy.sql.elements import TextClause
 
 from sqldbclient.utils.log_decorators import logger
 from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import IncorrectSqlQueryException
@@ -37,12 +36,7 @@ class SqlQueryPreparator:
             )
         return query_text
 
-    def prepare(self, query: Union[TextClause, str], limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
-        if isinstance(query, TextClause):
-            query_text = query.text
-        else:
-            query_text = query
-
+    def prepare(self, query_text: str, limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
         statements = sqlparse.parse(query_text)
         if len(statements) == 0:
             raise IncorrectSqlQueryException('Empty')
