@@ -27,7 +27,7 @@ class SqlExecutor(SqlTransactionManager):
 
     def _do_query_execution(
             self,
-            query: Union[TextClause, str],
+            query: str,
             max_rows_read: Optional[int] = None,
             outside_transaction: bool = False
     ) -> Tuple[Optional[pd.DataFrame], datetime, datetime]:
@@ -53,9 +53,11 @@ class SqlExecutor(SqlTransactionManager):
     def execute(self, query: Union[TextClause, str],
                 max_rows_read: Optional[int] = None,
                 outside_transaction: bool = False) -> Optional[pd.DataFrame]:
+        if isinstance(query, TextClause):
+            query = query.text
         result, start_time, finish_time = self._do_query_execution(query, max_rows_read, outside_transaction)
         executed_query = ExecutedSqlQuery(
-            query=query.text,
+            query=query,
             start_time=start_time,
             finish_time=finish_time
         )
