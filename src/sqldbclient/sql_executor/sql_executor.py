@@ -19,8 +19,8 @@ from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import Incor
 class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def __init__(self,
                  engine: Engine,
-                 max_rows_read: int = 10_000,
-                 history_db_name: str = 'sql_executor_history_v1.db'):
+                 max_rows_read: int,
+                 history_db_name: str):
         SqlTransactionManager.__init__(self, engine)
         SqlQueryPreparator.__init__(self, max_rows_read)
         SqlHistoryManager.__init__(self, history_db_name)

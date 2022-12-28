@@ -16,5 +16,5 @@ Here are just a few of the things that sql-executor does well:
   - first
 """
 
-from sqldbclient.sql_executor.sql_executor import SqlExecutor
+from sqldbclient.sql_executor import SqlExecutor, SqlExecutorConf
 from sqldbclient.utils import pandas as pandas_tools
