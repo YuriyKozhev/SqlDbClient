@@ -1,5 +1,10 @@
-from sqlalchemy.engine.cursor import CursorResult
 import pandas as pd
+
+try:
+    from sqlalchemy.engine.cursor import CursorResult
+except ImportError:
+    # support for legacy sqlalchemy versions (< 1.4)
+    from sqlalchemy.engine.result import ResultProxy as CursorResult
 
 from sqldbclient.utils.pandas.parse_dates import parse_dates
 
