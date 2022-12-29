@@ -22,3 +22,4 @@ class View:
 
     def __post_init__(self):
         self.full_name = f'"{self.schema}"."{self.name}"'
+        self.dependant_objects_number = len(self.dependant_objects)
