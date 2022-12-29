@@ -44,6 +44,9 @@ class SqlQueryPreparator:
         query_nstatements = len(statements)
 
         query_text = query_text.strip()
+        #  remove redundant ';' at the end of the query
+        if query_text[-1] == ';':
+            query_text = query_text[:-1]
         query_text = sqlparse.format(query_text, reindent=True, keyword_case='upper')
         if (self._limit_nrows or limit_nrows) and query_type == 'SELECT':
             query_text = self._add_limit(query_text, limit_nrows)
