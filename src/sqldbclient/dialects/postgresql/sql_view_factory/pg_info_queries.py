@@ -28,8 +28,8 @@ JOIN pg_attribute ON pg_depend.refobjid = pg_attribute.attrelid
 JOIN pg_namespace dependent_ns ON dependent_ns.oid = dependent_view.relnamespace
 JOIN pg_namespace source_ns ON source_ns.oid = source_table.relnamespace
 WHERE 
-    source_ns.nspname = {schema}
-    AND source_table.relname = name
+    source_ns.nspname = '{schema}'
+    AND source_table.relname = '{name}'
     AND pg_attribute.attnum > 0 
 ORDER BY 1,2
 '''
