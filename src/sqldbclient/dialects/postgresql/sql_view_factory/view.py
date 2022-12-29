@@ -16,8 +16,8 @@ class View:
     owner: str
     definition: str = field(repr=False)
     privileges: Dict[str, List[str]] = field(repr=False)
-    dependant_objects: List[object] = field(repr=False)
-    dependant_objects_number: List[object] = field(init=False)
+    dependant_objects: List['View'] = field(repr=False)
+    dependant_objects_number: int = field(init=False)
     full_name: str = field(init=False)
 
     def __post_init__(self):
