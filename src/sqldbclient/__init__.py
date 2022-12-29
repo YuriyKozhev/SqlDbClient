@@ -18,3 +18,4 @@ Here are just a few of the things that sql-executor does well:
 
 from sqldbclient.sql_executor import SqlExecutor, SqlExecutorConf
 from sqldbclient.utils import pandas as pandas_tools
+from sqldbclient import db_inspector
