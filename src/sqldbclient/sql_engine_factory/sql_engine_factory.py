@@ -5,7 +5,7 @@ from sqldbclient.utils.log_decorators import class_logifier
 
 
 @class_logifier(['get_or_create'])
-class SqlEngineFactor:
+class SqlEngineFactory:
     @functools.lru_cache(maxsize=None, typed=False)
     def get_or_create(self, *args, **kwargs) -> Engine:
         engine = create_engine(*args, **kwargs)
