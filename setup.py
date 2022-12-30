@@ -11,7 +11,7 @@ dependencies = (
 
 setuptools.setup(
     name="sqldbclient",
-    version="0.0.1",
+    version="0.0.2",
     author="Yuriy Kozhev",
     author_email="yuriy.kozhev@gmail.com",
     description="A SQL client software package, mainly for use in Jupyter Notebook environment",
@@ -34,6 +34,6 @@ setuptools.setup(
         'jupyter': ('jupyter', 'notebook', 'ipykernel'),
     },
     license='MIT',
-    license_files = ('LICENSE',),
+    license_files=('LICENSE',),
     platforms=['any'],
 )
