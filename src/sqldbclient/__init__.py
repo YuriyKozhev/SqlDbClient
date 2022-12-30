@@ -11,9 +11,9 @@ mainly 2 powerful packages sqlalchemy and pandas.
 
 Main Features
 -------------
-Here are just a few of the things that sql-executor does well:
+Here are just a few of the things that sql-executor can do:
 
-  - first
+  - to be written...
 """
 
 import logging
