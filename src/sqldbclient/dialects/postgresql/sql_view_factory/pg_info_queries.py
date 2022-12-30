@@ -59,3 +59,12 @@ PG_OBJECT_PRIVILEGES_TEMPLATE = Template('''
             regexp_split_to_array(acl, '=|/') AS s
         WHERE nspname = '$schema' and relname='$name'
 ''')
+
+PG_OBJECT_INDEXES_TEMPLATE = '''
+    SELECT 
+        schemaname AS schema, 
+        indexname AS name, 
+        indexdef AS definition
+    FROM pg_indexes
+    WHERE tablename = '{name}' AND schemaname = '{schema}'
+'''

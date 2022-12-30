@@ -22,6 +22,10 @@ class SqlViewFactory:
         self.sql_executor = sql_executor
         self.parameters = dict(name=view_name, schema=view_schema)
 
+    def _get_indexes(self) -> None:
+        df = self.sql_executor.execute(PG_OBJECT_INDEXES_TEMPLATE.format(name=self.name, schema=self.schema))
+        self.parameters['indexes'] = list(df.to_dict(orient='index').values())
+
     def _get_dependant_objects(self) -> None:
         dependencies = extract_dependant_objects(self.name, self.schema, self.sql_executor)
         dependant_objects = dependencies.apply(
@@ -64,5 +68,6 @@ class SqlViewFactory:
         self._get_main_parameters()
         self._get_privileges()
         self._get_dependant_objects()
+        self._get_indexes()
         view_object = View(**self.parameters)
         return view_object
