@@ -29,4 +29,7 @@ with the following features:
 
       await sql_async_planner.plan_execution('SELECT 1 AS a')
       result = await sql_async_planner.get_result()
-- 
+
+
+
+! 'INSTEAD OF' view triggers will not be restored

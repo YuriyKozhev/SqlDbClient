@@ -1,11 +1,13 @@
+import logging
 from typing import Optional
 import re
 
 import sqlparse
 
-from sqldbclient.utils.log_decorators import logger
 from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import IncorrectSqlQueryException
 from sqldbclient.sql_query_preparator.prepared_sql_query import PreparedSqlQuery
+
+logger = logging.getLogger(__name__)
 
 
 class SqlQueryPreparator:
@@ -37,6 +39,7 @@ class SqlQueryPreparator:
         return query_text
 
     def prepare(self, query_text: str, limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
+        logger.debug(f'Initial query text: {query_text}')
         statements = sqlparse.parse(query_text)
         if len(statements) == 0:
             raise IncorrectSqlQueryException('Empty')
@@ -56,4 +59,5 @@ class SqlQueryPreparator:
             query_type=query_type,
             nstatements=query_nstatements
         )
+        logger.debug(f'Prepared query: {prepared_sql_query}')
         return prepared_sql_query

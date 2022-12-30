@@ -6,24 +6,24 @@ import functools
 logger = logging.getLogger(__name__)
 
 
-def method_logifier(method, class_):
+def time_logifier(method, class_):
     @functools.wraps(method)
     def _logged_method(*args, **kwargs):
-        logger.warning(f'Started {method.__name__} of {class_.__name__}')
+        logger.debug(f'Started {method.__name__} of {class_.__name__}')
         start = datetime.now()
         result = method(*args, **kwargs)
         finish = datetime.now()
         finish = finish.replace(microsecond=start.microsecond)
-        logger.warning(f'Finished {method.__name__} of {class_.__name__}, duration={finish - start} seconds')
+        logger.debug(f'Finished {method.__name__} of {class_.__name__}, duration = {finish - start}')
         return result
 
     async def _async_logged_method(*args, **kwargs):
-        logger.warning(f'Started {method.__name__} of {class_.__name__}')
+        logger.debug(f'Started {method.__name__} of {class_.__name__}')
         start = datetime.now()
         result = await method(*args, **kwargs)
         finish = datetime.now()
         finish = finish.replace(microsecond=start.microsecond)
-        logger.warning(f'Finished {method.__name__} of {class_.__name__}, duration={finish - start} seconds')
+        logger.debug(f'Finished {method.__name__} of {class_.__name__}, duration = {finish - start}')
         return result
 
     if inspect.iscoroutinefunction(method):
@@ -37,7 +37,7 @@ def class_logifier(methods):
         for method in methods:
             if not callable(getattr(class_, method)):
                 raise Exception(f'Member {method} of class {class_} not callable!')
-            logged_method = method_logifier(getattr(class_, method), class_)
+            logged_method = time_logifier(getattr(class_, method), class_)
             setattr(class_, method, logged_method)
         return class_
 

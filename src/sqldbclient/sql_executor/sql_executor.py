@@ -1,3 +1,4 @@
+import logging
 from typing import Union, Optional, Tuple
 from datetime import datetime
 import pandas as pd
@@ -5,7 +6,7 @@ import pandas as pd
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.sql.elements import TextClause
 
-from sqldbclient.utils.log_decorators import class_logifier, logger
+from sqldbclient.utils.log_decorators import class_logifier
 from sqldbclient.sql_transaction_manager.sql_transaction_manager import SqlTransactionManager
 from sqldbclient.sql_history_manager.sql_history_manager import SqlHistoryManager
 from sqldbclient.sql_history_manager.tables.executed_sql_query.executed_sql_query import ExecutedSqlQuery
@@ -13,6 +14,8 @@ from sqldbclient.utils.pandas.cursor_result_to_df import cursor_result_to_df
 from sqldbclient.utils.deprecated import deprecated
 from sqldbclient.sql_query_preparator.sql_query_preparator import SqlQueryPreparator
 from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import IncorrectSqlQueryException
+
+logger = logging.getLogger(__name__)
 
 
 @class_logifier(methods=['execute'])
@@ -61,7 +64,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             start_time=start_time,
             finish_time=finish_time
         )
-        logger.warning('Executed: ' + str(executed_query))
+        logger.info('Executed: ' + str(executed_query))
         super().dump(executed_query, result)
         return result
 

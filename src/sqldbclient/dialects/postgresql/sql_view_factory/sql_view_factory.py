@@ -1,14 +1,17 @@
+import logging
+
 import pandas as pd
 
 from sqldbclient.dialects.postgresql.sql_view_factory.view import View, ViewType
 from sqldbclient.dialects.postgresql.sql_view_factory.pg_info_queries import *
 from sqldbclient.sql_executor import SqlExecutor
-from sqldbclient.utils.log_decorators import logger
+
+logger = logging.getLogger(__name__)
 
 
 def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
     df = sql_executor.execute(PG_OBJECT_DEPENDENCIES_TEMPLATE.format(name=name, schema=schema))
-    logger.warning(f'Found {len(df)} dependant objects for "{schema}"."{name}"')
+    logger.info(f'Found {len(df)} dependant objects for "{schema}"."{name}"')
     # BFS-like algorithm
     for _, row in df.iterrows():
         df = pd.concat([df, extract_dependant_objects(row.dependent_view, row.dependent_schema, sql_executor)])

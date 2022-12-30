@@ -1,10 +1,12 @@
+import logging
 from dataclasses import fields
 
 from sqldbclient.sql_executor import SqlExecutor
 from sqldbclient.dialects.postgresql.sql_view_factory.view import View
 from sqldbclient.dialects.postgresql.sql_view_factory.sql_view_factory import SqlViewFactory
 from sqldbclient.dialects.postgresql.sql_view_materializer.sql_view_materializer_utils import SqlViewMaterializerUtils
-from sqldbclient.utils.log_decorators import logger
+
+logger = logging.getLogger(__name__)
 
 
 class SqlViewMaterializer:
@@ -37,14 +39,14 @@ class SqlViewMaterializer:
                 SqlViewMaterializerUtils(obj, self.sql_executor).create_indexes()
 
             self.sql_executor.commit()
-        logger.warning(f'View {self} recreated')
+        logger.info(f'View {self} recreated')
 
     def _parse_field(self, field):
         existing_value = getattr(self.existing_view, field.name)
         new_value = getattr(self.view, field.name)
         if existing_value == new_value:
             return
-        logger.warning(f'Found different value for field: {field.name}')
+        logger.info(f'Found different value for field: {field.name}')
 
         if field.name in ['schema', 'name', 'full_name']:
             raise Exception('Unexpected error')
@@ -60,11 +62,11 @@ class SqlViewMaterializer:
             logger.warning(f'To change {field.name} view {self.view.full_name} will be fully recreated')
             self._recreate()
 
-        logger.warning(f'Field {field.name} set to {new_value}')
+        logger.info(f'Field {field.name} set to {new_value}')
 
     def materialize(self) -> None:
         if self.view == self.existing_view:
-            logger.warning("View already exists. Exiting...")
+            logger.warning("View already exists, nothing done")
             return
 
         if fields(self.view) != fields(self.existing_view):

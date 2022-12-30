@@ -1,17 +1,21 @@
+import logging
 from typing import Optional
-import time
+from datetime import datetime
+
 import sqlalchemy
 from sqlalchemy.engine.base import Engine, RootTransaction
-from sqldbclient.utils.log_decorators import logger
+
 from sqldbclient.utils.deprecated import deprecated
 from sqldbclient.sql_transaction_manager.not_in_transaction_exception import NotInTransActionException
+
+logger = logging.getLogger(__name__)
 
 
 class SqlTransactionManager:
     def __init__(self, engine: Engine):
         self._engine = engine
         self._transaction: Optional[RootTransaction] = None
-        self._start: Optional[float] = None
+        self._start: Optional[datetime] = None
 
     @property
     def _is_in_transaction(self) -> bool:
@@ -33,15 +37,16 @@ class SqlTransactionManager:
     def __enter__(self):
         if self._is_in_transaction:
             raise NotImplementedError('Nested transaction are not supported yet')
-        logger.warning(f'Starting transaction')
-        self._start = time.perf_counter()
+        logger.info(f'Starting transaction')
+        self._start = datetime.now()
         connection = self._get_connection()
         self._transaction = connection.begin()
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):
-        finish = time.perf_counter()
-        logger.warning(f'Exiting transaction, duration={finish - self._start:0.2f} seconds')
+        finish = datetime.now()
+        finish = finish.replace(microsecond=self._start.microsecond)
+        logger.info(f'Exiting transaction, duration = {finish - self._start}')
         if self._is_in_transaction:
             self.rollback()
         self._transaction.connection.close()
@@ -50,13 +55,13 @@ class SqlTransactionManager:
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.commit()
-        logger.warning(f'Transaction committed')
+        logger.info(f'Transaction committed')
 
     def rollback(self):
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.rollback()
-        logger.warning(f'Transaction rolled back')
+        logger.info(f'Transaction rolled back')
 
     @deprecated
     def commit_transaction(self):
