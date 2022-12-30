@@ -72,3 +72,17 @@ class SqlViewMaterializerUtils:
         else:
             raise Exception('Unexpected error')
         logger.warning(f'Refreshed {self.view.full_name}')
+
+    def drop_indexes(self) -> None:
+        logger.warning(f'Dropping indexes for {self.view.full_name}...')
+        for index in self.view.indexes:
+            self.sql_executor.execute(f'''
+                DROP INDEX "{index['schema']}"."{index['name']}"
+            ''')
+        logger.warning(f'Dropped indexes for {self.view.full_name}')
+
+    def create_indexes(self) -> None:
+        logger.warning(f'Creating indexes for {self.view.full_name}...')
+        for index in self.view.indexes:
+            self.sql_executor.execute(index['definition'])
+        logger.warning(f'Created indexes for {self.view.full_name}')

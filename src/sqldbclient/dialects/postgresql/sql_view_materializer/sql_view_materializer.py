@@ -31,6 +31,11 @@ class SqlViewMaterializer:
             for obj in self.view.dependant_objects:
                 SqlViewMaterializerUtils(obj, self.sql_executor).refresh()
 
+            # from parents to children
+            SqlViewMaterializerUtils(self.view, self.sql_executor).create_indexes()
+            for obj in self.view.dependant_objects:
+                SqlViewMaterializerUtils(obj, self.sql_executor).create_indexes()
+
             self.sql_executor.commit()
         logger.warning(f'View {self} recreated')
 
@@ -43,7 +48,7 @@ class SqlViewMaterializer:
 
         if field.name in ['schema', 'name', 'full_name']:
             raise Exception('Unexpected error')
-        if field.name in ['dependant_objects', 'dependant_objects_number']:
+        if field.name in ['dependant_objects', 'dependant_objects_number', 'indexes']:
             logger.warning(f'{field.name} cannot be changed')
             return
 
