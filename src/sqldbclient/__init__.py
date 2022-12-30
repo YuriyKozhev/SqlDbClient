@@ -20,8 +20,7 @@ import logging
 
 
 from sqldbclient.sql_executor import SqlExecutor, SqlExecutorConf
-from sqldbclient.utils import pandas as pandas_tools
-from sqldbclient import db_inspector
+from sqldbclient.sql_engine_factory import sql_engine_factory
 
 
 logging.getLogger(__name__)
