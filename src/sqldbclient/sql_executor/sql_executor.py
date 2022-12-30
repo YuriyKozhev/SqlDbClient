@@ -33,7 +33,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             query: str,
             max_rows_read: Optional[int] = None,
             outside_transaction: bool = False
-    ) -> Tuple[Optional[pd.DataFrame], datetime, datetime]:
+    ) -> Tuple[Optional[pd.DataFrame], ExecutedSqlQuery]:
         connection = super()._get_connection(outside_transaction=outside_transaction)
         prepared_sql_query = super().prepare(query, max_rows_read)
 
@@ -51,19 +51,20 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
         if not super()._is_in_transaction:
             connection.close()
 
-        return result, start_time, finish_time
+        executed_query = ExecutedSqlQuery(
+            query=prepared_sql_query.text,
+            start_time=start_time,
+            finish_time=finish_time
+        )
+        return result, executed_query
 
     def execute(self, query: Union[TextClause, str],
                 max_rows_read: Optional[int] = None,
                 outside_transaction: bool = False) -> Optional[pd.DataFrame]:
         if isinstance(query, TextClause):
             query = query.text
-        result, start_time, finish_time = self._do_query_execution(query, max_rows_read, outside_transaction)
-        executed_query = ExecutedSqlQuery(
-            query=query,
-            start_time=start_time,
-            finish_time=finish_time
-        )
+        result, executed_query = self._do_query_execution(query, max_rows_read, outside_transaction)
+
         logger.info('Executed: ' + str(executed_query))
         super().dump(executed_query, result)
         return result
