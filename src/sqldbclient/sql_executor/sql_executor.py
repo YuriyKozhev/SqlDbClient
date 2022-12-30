@@ -65,7 +65,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             query = query.text
         result, executed_query = self._do_query_execution(query, max_rows_read, outside_transaction)
 
-        logger.info('Executed: ' + str(executed_query))
+        logger.warning(f'Executed {executed_query}')
         super().dump(executed_query, result)
         return result
 
