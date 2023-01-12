@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
     df = sql_executor.execute(PG_OBJECT_DEPENDENCIES_TEMPLATE.format(name=name, schema=schema))
     logger.info(f'Found {len(df)} dependant objects for "{schema}"."{name}"')
-    # BFS-like algorithm
+    # dependant objects tree traversal in pre-order (that is, object first, its dependencies second)
     for _, row in df.iterrows():
         df = pd.concat([df, extract_dependant_objects(row.dependent_view, row.dependent_schema, sql_executor)])
+    # an object can depend on multiple dependable objects, thus will be included multiple times
+    df = df.drop_duplicates()
     return df
 
 
