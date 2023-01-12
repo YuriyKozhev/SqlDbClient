@@ -46,8 +46,8 @@ def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor)
         for idx, dep in deps.iterrows():
             if not dependencies.loc[idx, 'explored']:
                 dependencies.loc[
-                    (dependencies['source_schema'] == dep['source_schema']) &
-                    (dependencies['source_table'] == dep['source_table']),
+                    (dependencies['dependent_schema'] == dep['source_schema']) &
+                    (dependencies['dependent_view'] == dep['source_table']),
                     'explored'
                 ] = True
                 q.put(dep)
