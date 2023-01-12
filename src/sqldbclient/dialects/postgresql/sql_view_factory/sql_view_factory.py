@@ -45,7 +45,11 @@ def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor)
         ]
         for idx, dep in deps.iterrows():
             if not dependencies.loc[idx, 'explored']:
-                dependencies.loc[idx, 'explored'] = True
+                dependencies.loc[
+                    (dependencies['source_schema'] == dep['source_schema']) &
+                    (dependencies['source_table'] == dep['source_table']),
+                    'explored'
+                ] = True
                 q.put(dep)
     values.pop(0)
     if values:
