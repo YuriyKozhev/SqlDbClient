@@ -1,5 +1,4 @@
 import logging
-import queue
 
 import pandas as pd
 
@@ -19,8 +18,20 @@ def pre_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFr
     return df
 
 
-def breadth_first_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
-    pass
+def depth_first_traverse(dependencies, obj, values) -> None:
+    dependencies.loc[
+        (dependencies['dependent_schema'] == obj['dependent_schema']) &
+        (dependencies['dependent_view'] == obj['dependent_view']),
+        'explored'
+    ] = True
+    deps = dependencies[
+        (dependencies['source_schema'] == obj['dependent_schema']) &
+        (dependencies['source_table'] == obj['dependent_view'])
+        ]
+    for idx, dep in deps.iterrows():
+        if not dependencies.loc[idx, 'explored']:
+            depth_first_traverse(dependencies, dep, values)
+    values.append(obj)
 
 
 def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
@@ -33,25 +44,10 @@ def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor)
         'source_table': name,
         'explored': True
     })
-    q = queue.Queue()
-    q.put(root)
     values = []
-    while not q.empty():
-        obj = q.get(block=False)
-        values.append(obj)
-        deps = dependencies[
-            (dependencies['source_schema'] == obj['dependent_schema']) &
-            (dependencies['source_table'] == obj['dependent_view'])
-        ]
-        for idx, dep in deps.iterrows():
-            if not dependencies.loc[idx, 'explored']:
-                dependencies.loc[
-                    (dependencies['dependent_schema'] == dep['dependent_schema']) &
-                    (dependencies['dependent_view'] == dep['dependent_view']),
-                    'explored'
-                ] = True
-                q.put(dep)
-    values.pop(0)
+    depth_first_traverse(dependencies, root, values)
+    values = values[:-1]  # remove root
+    values = values[::-1]  # reverse order
     if values:
         result = pd.concat(values, axis=1).T
     else:
