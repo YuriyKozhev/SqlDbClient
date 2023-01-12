@@ -16,7 +16,7 @@ def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor)
     for _, row in df.iterrows():
         df = pd.concat([df, extract_dependant_objects(row.dependent_view, row.dependent_schema, sql_executor)])
     # an object can depend on multiple dependable objects, thus will be included multiple times
-    df = df.drop_duplicates()
+    df = df.drop_duplicates(['dependent_schema', 'dependent_view'])
     return df
 
 
