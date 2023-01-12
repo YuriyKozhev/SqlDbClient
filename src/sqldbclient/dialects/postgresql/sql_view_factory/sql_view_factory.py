@@ -1,4 +1,5 @@
 import logging
+import queue
 
 import pandas as pd
 
@@ -9,15 +10,49 @@ from sqldbclient.sql_executor import SqlExecutor
 logger = logging.getLogger(__name__)
 
 
-def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
+def pre_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
     df = sql_executor.execute(PG_OBJECT_DEPENDENCIES_TEMPLATE.format(name=name, schema=schema))
     logger.info(f'Found {len(df)} dependant objects for "{schema}"."{name}"')
     # dependant objects tree traversal in pre-order (that is, object first, its dependencies second)
     for _, row in df.iterrows():
-        df = pd.concat([df, extract_dependant_objects(row.dependent_view, row.dependent_schema, sql_executor)])
-    # an object can depend on multiple dependable objects, thus will be included multiple times
-    df = df.drop_duplicates(['dependent_schema', 'dependent_view'])
+        df = pd.concat([df, pre_traverse(row.dependent_view, row.dependent_schema, sql_executor)])
     return df
+
+
+def breadth_first_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
+    pass
+
+
+def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
+    dependencies = pre_traverse(name, schema, sql_executor).reset_index(drop=True)
+    dependencies['explored'] = False
+    root = pd.Series({
+        'dependent_schema': schema,
+        'dependent_view': name,
+        'source_schema': schema,
+        'source_table': name,
+        'explored': True
+    })
+    q = queue.Queue()
+    q.put(root)
+    values = []
+    while not q.empty():
+        obj = q.get(block=False)
+        values.append(obj)
+        deps = dependencies[
+            (dependencies['source_schema'] == obj['dependent_schema']) &
+            (dependencies['source_table'] == obj['dependent_view'])
+        ]
+        for idx, dep in deps.iterrows():
+            if not dependencies.loc[idx, 'explored']:
+                dependencies.loc[idx, 'explored'] = True
+                q.put(dep)
+    values.pop(0)
+    if values:
+        result = pd.concat(values, axis=1).T
+    else:
+        result = pd.DataFrame({}, columns=['dependent_view', 'dependent_schema'])
+    return result
 
 
 class SqlViewFactory:
