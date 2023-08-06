@@ -1,12 +1,22 @@
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+import re
 
 import sqlparse
 from sqlalchemy import String, DateTime, Interval
 from sqlalchemy import Table, Column
 
 from sqldbclient.sql_history_manager.orm_config import metadata, orm_map, EXECUTED_SQL_QUERY_TABLE_NAME
+
+QUERY_TEXT_HALF_MAX_REPR_SIZE = 50
+
+
+def shorten_query(query: str) -> str:
+    query = re.sub(r'\s+', ' ', query)
+    if len(query) > QUERY_TEXT_HALF_MAX_REPR_SIZE * 2:
+        return f'{query[:QUERY_TEXT_HALF_MAX_REPR_SIZE]} ... {query[-QUERY_TEXT_HALF_MAX_REPR_SIZE:]}'
+    return query
 
 
 executed_sql_query = Table(
@@ -37,9 +47,7 @@ class ExecutedSqlQuery:
         self.duration = self.finish_time.replace(microsecond=self.start_time.microsecond) - self.start_time
         self.uuid = uuid.uuid4().hex
         self.query_type = sqlparse.parse(self.query)[0].get_type()
-        self.query_shortened = self.query
-        if len(self.query_shortened) > 20:
-            self.query_shortened = f'{self.query[:10]} ... {self.query[-10:]}'
+        self.query_shortened = shorten_query(self.query)
 
 
 orm_map(ExecutedSqlQuery, executed_sql_query)
