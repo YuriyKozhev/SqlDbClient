@@ -13,7 +13,6 @@ from sqldbclient.sql_history_manager.tables.executed_sql_query.executed_sql_quer
 from sqldbclient.utils.pandas.cursor_result_to_df import cursor_result_to_df
 from sqldbclient.utils.deprecated import deprecated
 from sqldbclient.sql_query_preparator.sql_query_preparator import SqlQueryPreparator
-from sqldbclient.sql_query_preparator.incorrect_sql_query_exception import IncorrectSqlQueryException
 
 logger = logging.getLogger(__name__)
 
@@ -31,16 +30,23 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def _do_query_execution(
             self,
             query: str,
+            use_raw_query: bool = False,
             add_limit: bool = True,
             max_rows_read: Optional[int] = None,
             outside_transaction: bool = False,
             force_result_fetching: bool = False,
     ) -> Tuple[Optional[pd.DataFrame], ExecutedSqlQuery]:
         connection = super()._get_connection(outside_transaction=outside_transaction)
-        prepared_sql_query = super().prepare(query, add_limit, max_rows_read)
+
+        query_to_execute = query
+        query_to_save = query
+        if not use_raw_query:
+            prepared_sql_query = super().prepare(query, add_limit, max_rows_read)
+            query_to_execute = prepared_sql_query.text_sa_clause
+            query_to_save = prepared_sql_query.text
 
         start_time = datetime.now()
-        cursor_result = connection.execute(prepared_sql_query.text_sa_clause)
+        cursor_result = connection.execute(query_to_execute)
         result = cursor_result_to_df(cursor_result, force_result_fetching)
         finish_time = datetime.now()
 
@@ -48,7 +54,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             connection.close()
 
         executed_query = ExecutedSqlQuery(
-            query=prepared_sql_query.text,
+            query=query_to_save,
             start_time=start_time,
             finish_time=finish_time
         )
@@ -57,15 +63,21 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def execute(
         self,
         query: Union[TextClause, str],
+        use_raw_query: bool = False,
         add_limit: bool = True,
         max_rows_read: Optional[int] = None,
         outside_transaction: bool = False,
         force_result_fetching: bool = False,
     ) -> Optional[pd.DataFrame]:
+        if use_raw_query is True and add_limit is True:
+            raise ValueError("Argument 'add_limit' should be set to False when 'use_raw_query' is set to True")
+        if add_limit is False and max_rows_read is not None:
+            raise ValueError("Argument 'max_rows_read' cannot be set when 'add_limit' is set to False")
         if isinstance(query, TextClause):
             query = query.text
         result, executed_query = self._do_query_execution(
             query,
+            use_raw_query,
             add_limit,
             max_rows_read,
             outside_transaction,
