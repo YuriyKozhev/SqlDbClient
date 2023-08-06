@@ -32,18 +32,15 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             self,
             query: str,
             max_rows_read: Optional[int] = None,
-            outside_transaction: bool = False
+            outside_transaction: bool = False,
+            force_result_fetching: bool = False,
     ) -> Tuple[Optional[pd.DataFrame], ExecutedSqlQuery]:
         connection = super()._get_connection(outside_transaction=outside_transaction)
         prepared_sql_query = super().prepare(query, max_rows_read)
 
         start_time = datetime.now()
-        result = None
-        if prepared_sql_query.query_type == 'SELECT':
-            cursor_result = connection.execute(prepared_sql_query.text_sa_clause)
-            result = cursor_result_to_df(cursor_result)
-        else:
-            connection.execute(prepared_sql_query.text_sa_clause)
+        cursor_result = connection.execute(prepared_sql_query.text_sa_clause)
+        result = cursor_result_to_df(cursor_result, force_result_fetching)
         finish_time = datetime.now()
 
         if not super()._is_in_transaction:
@@ -56,13 +53,21 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
         )
         return result, executed_query
 
-    def execute(self, query: Union[TextClause, str],
-                max_rows_read: Optional[int] = None,
-                outside_transaction: bool = False) -> Optional[pd.DataFrame]:
+    def execute(
+        self,
+        query: Union[TextClause, str],
+        max_rows_read: Optional[int] = None,
+        outside_transaction: bool = False,
+        force_result_fetching: bool = False,
+    ) -> Optional[pd.DataFrame]:
         if isinstance(query, TextClause):
             query = query.text
-        result, executed_query = self._do_query_execution(query, max_rows_read, outside_transaction)
-
+        result, executed_query = self._do_query_execution(
+            query,
+            max_rows_read,
+            outside_transaction,
+            force_result_fetching,
+        )
         logger.warning(f'Executed {executed_query}')
         super().dump(executed_query, result)
         return result
