@@ -2,7 +2,7 @@ from typing import Optional, Union, List
 from datetime import datetime
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .orm_config import metadata

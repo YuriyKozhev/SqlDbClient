@@ -3,7 +3,9 @@ import logging
 import pandas as pd
 
 from sqldbclient.dialects.postgresql.sql_view_factory.view import View, ViewType
-from sqldbclient.dialects.postgresql.sql_view_factory.pg_info_queries import *
+from sqldbclient.dialects.postgresql.sql_view_factory.pg_info_queries import PG_VIEWS_INFO_TEMPLATE, \
+    PG_OBJECT_DEPENDENCIES_TEMPLATE, PG_OBJECT_INDEXES_TEMPLATE, PG_MATVIEWS_INFO_TEMPLATE, \
+    PG_OBJECT_PRIVILEGES_TEMPLATE
 from sqldbclient.sql_executor import SqlExecutor
 
 logger = logging.getLogger(__name__)

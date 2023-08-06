@@ -5,7 +5,7 @@ __doc__ = """
 sql-executor 
 =====================================================================
 
-**sql-executor ** provides additional functionalities to work with DBMS utilizing 
+**sql-executor** provides additional functionalities to work with DBMS utilizing 
 mainly 2 powerful packages sqlalchemy and pandas.
 
 

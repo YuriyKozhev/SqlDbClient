@@ -2,7 +2,7 @@ import pandas as pd
 
 try:
     from IPython.display import display
-except ImportError as e:
+except ImportError:
     raise ImportError('Pandas DataFrame full_display method available only for Jupyter environment')
 
 

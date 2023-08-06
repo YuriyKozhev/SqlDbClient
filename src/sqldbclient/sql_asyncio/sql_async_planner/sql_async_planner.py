@@ -4,8 +4,8 @@ import asyncio
 
 try:
     from sqlalchemy.ext.asyncio.engine import AsyncEngine
-except ImportError as e:
-    raise ImportError(f'Async tools requires sqlalchemy version >= 1.4')
+except ImportError:
+    raise ImportError('Async tools requires sqlalchemy version >= 1.4')
 
 from sqldbclient.sql_asyncio.sql_async_executor.sql_async_executor import SqlAsyncExecutor
 

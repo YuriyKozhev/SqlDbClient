@@ -37,7 +37,7 @@ class SqlTransactionManager:
     def __enter__(self):
         if self._is_in_transaction:
             raise NotImplementedError('Nested transaction are not supported yet')
-        logger.warning(f'Starting transaction')
+        logger.warning('Starting transaction')
         self._start = datetime.now()
         connection = self._get_connection()
         self._transaction = connection.begin()
@@ -55,13 +55,13 @@ class SqlTransactionManager:
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.commit()
-        logger.warning(f'Transaction committed')
+        logger.warning('Transaction committed')
 
     def rollback(self):
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.rollback()
-        logger.warning(f'Transaction rolled back')
+        logger.warning('Transaction rolled back')
 
     @deprecated
     def commit_transaction(self):

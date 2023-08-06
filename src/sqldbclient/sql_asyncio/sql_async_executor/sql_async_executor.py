@@ -6,8 +6,8 @@ try:
     from sqlalchemy.ext.asyncio import create_async_engine
     from sqlalchemy.ext.asyncio.engine import AsyncEngine, AsyncConnection
     from sqlalchemy.exc import ResourceClosedError
-except ImportError as e:
-    raise ImportError(f'Async tools requires sqlalchemy version >= 1.4')
+except ImportError:
+    raise ImportError('Async tools requires sqlalchemy version >= 1.4')
 
 from sqldbclient.utils.log_decorators import class_logifier
 
