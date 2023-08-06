@@ -38,12 +38,15 @@ class SqlHistoryManager:
         self._cached_query_results[uuid] = df
         return df
 
-    def get_executing_info(self, uuid: str) -> ExecutedSqlQuery:
-        executing_info = self._history_db_session.query(ExecutedSqlQuery).filter_by(uuid=uuid).first()
-        if executing_info is None:
+    def get_execution_info(self, uuid: str) -> ExecutedSqlQuery:
+        execution_info = self._history_db_session.query(ExecutedSqlQuery).filter_by(uuid=uuid).first()
+        if execution_info is None:
             raise ValueError(f'No executing info found for uuid = {uuid}')
-        self._history_db_session.expunge(executing_info)
-        return executing_info
+        self._history_db_session.expunge(execution_info)
+        return execution_info
+
+    def get_exec_info(self, uuid: str) -> ExecutedSqlQuery:
+        return self.get_execution_info(uuid)
 
     def __getitem__(self, uuid: str) -> pd.DataFrame:
         return self.get_result(uuid)
