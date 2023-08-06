@@ -40,8 +40,6 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
         start_time = datetime.now()
         result = None
         if prepared_sql_query.query_type == 'SELECT':
-            if prepared_sql_query.nstatements > 1:
-                raise IncorrectSqlQueryException('Use one statement for SELECT')
             cursor_result = connection.execute(prepared_sql_query.text_sa_clause)
             result = cursor_result_to_df(cursor_result)
         else:

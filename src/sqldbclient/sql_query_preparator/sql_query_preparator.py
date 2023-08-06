@@ -43,8 +43,11 @@ class SqlQueryPreparator:
         statements = sqlparse.parse(query_text)
         if len(statements) == 0:
             raise IncorrectSqlQueryException('Empty')
+        if len(statements) > 1:
+            raise IncorrectSqlQueryException(
+                "Can execute one statement at a time, use separate execute method calls for each statement"
+            )
         query_type = statements[-1].get_type()
-        query_nstatements = len(statements)
 
         query_text = query_text.strip()
         #  remove redundant ';' at the end of the query
@@ -57,7 +60,6 @@ class SqlQueryPreparator:
         prepared_sql_query = PreparedSqlQuery(
             text=query_text,
             query_type=query_type,
-            nstatements=query_nstatements
         )
         logger.debug(f'Prepared query: {prepared_sql_query}')
         return prepared_sql_query
