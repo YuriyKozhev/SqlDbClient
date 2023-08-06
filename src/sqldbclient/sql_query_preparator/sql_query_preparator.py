@@ -38,7 +38,7 @@ class SqlQueryPreparator:
             )
         return query_text
 
-    def prepare(self, query_text: str, limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
+    def prepare(self, query_text: str, add_limit: bool = True, limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
         logger.debug(f'Initial query text: {query_text}')
         statements = sqlparse.parse(query_text)
         if len(statements) == 0:
@@ -54,7 +54,7 @@ class SqlQueryPreparator:
         if query_text[-1] == ';':
             query_text = query_text[:-1]
         query_text = sqlparse.format(query_text, reindent=True, keyword_case='upper')
-        if (self._limit_nrows or limit_nrows) and query_type == 'SELECT':
+        if (self._limit_nrows or limit_nrows) and query_type == 'SELECT' and add_limit:
             query_text = self._add_limit(query_text, limit_nrows)
 
         prepared_sql_query = PreparedSqlQuery(

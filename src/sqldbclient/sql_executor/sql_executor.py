@@ -31,12 +31,13 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def _do_query_execution(
             self,
             query: str,
+            add_limit: bool = True,
             max_rows_read: Optional[int] = None,
             outside_transaction: bool = False,
             force_result_fetching: bool = False,
     ) -> Tuple[Optional[pd.DataFrame], ExecutedSqlQuery]:
         connection = super()._get_connection(outside_transaction=outside_transaction)
-        prepared_sql_query = super().prepare(query, max_rows_read)
+        prepared_sql_query = super().prepare(query, add_limit, max_rows_read)
 
         start_time = datetime.now()
         cursor_result = connection.execute(prepared_sql_query.text_sa_clause)
@@ -56,6 +57,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
     def execute(
         self,
         query: Union[TextClause, str],
+        add_limit: bool = True,
         max_rows_read: Optional[int] = None,
         outside_transaction: bool = False,
         force_result_fetching: bool = False,
@@ -64,6 +66,7 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             query = query.text
         result, executed_query = self._do_query_execution(
             query,
+            add_limit,
             max_rows_read,
             outside_transaction,
             force_result_fetching,
