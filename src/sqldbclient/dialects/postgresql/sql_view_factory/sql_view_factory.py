@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import pandas as pd
 
@@ -12,6 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 def pre_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
+    """Collects object dependencies, dependencies of its dependencies, and etc.
+
+    :param name: object name
+    :param schema: object schema
+    :param sql_executor: instance of SqlExecutor
+    :return:
+    """
     df = sql_executor.execute(PG_OBJECT_DEPENDENCIES_TEMPLATE.format(name=name, schema=schema))
     logger.info(f'Found {len(df)} dependant objects for "{schema}"."{name}"')
     # dependant objects tree traversal in pre-order (that is, object first, its dependencies second)
@@ -20,7 +28,13 @@ def pre_traverse(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFr
     return df
 
 
-def depth_first_traverse(dependencies, obj, values) -> None:
+def depth_first_traverse(dependencies: pd.DataFrame, obj: pd.Series, values: List[pd.Series]) -> None:
+    """Sorts dependencies from children to parents.
+
+    :param dependencies: pandas DataFrame
+    :param obj: pandas Series
+    :param values: list of sorted objects
+    """
     dependencies.loc[
         (dependencies['dependent_schema'] == obj['dependent_schema']) &
         (dependencies['dependent_view'] == obj['dependent_view']),
@@ -37,6 +51,13 @@ def depth_first_traverse(dependencies, obj, values) -> None:
 
 
 def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor) -> pd.DataFrame:
+    """Extracts dependencies ordered from parents to children.
+
+    :param name: object name
+    :param schema: object schema
+    :param sql_executor: instance of SqlExecutor
+    :return:
+    """
     dependencies = pre_traverse(name, schema, sql_executor).reset_index(drop=True)
     dependencies['explored'] = False
     root = pd.Series({
@@ -58,6 +79,9 @@ def extract_dependant_objects(name: str, schema: str, sql_executor: SqlExecutor)
 
 
 class SqlViewFactory:
+    """Factory to create View objects, which store all information obout them
+    to be able to fully restore them in database, if necessary.
+    """
     def __init__(self, view_name: str, view_schema: str, sql_executor: SqlExecutor):
         self.name = view_name
         self.schema = view_schema
@@ -107,6 +131,10 @@ class SqlViewFactory:
             raise Exception(f'View object "{self.schema}"."{self.name}" not found')
 
     def create(self) -> View:
+        """Creates View object with all necessary information.
+
+        :return: View object
+        """
         self._get_main_parameters()
         self._get_privileges()
         self._get_dependant_objects()

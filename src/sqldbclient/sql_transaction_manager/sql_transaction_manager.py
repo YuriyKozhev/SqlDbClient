@@ -12,6 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class SqlTransactionManager:
+    """Class that is responsible for transaction management.
+    Provides handy context manager, which used as follows (sql_executor is an instance of SqlTransactionManager)::
+
+        with sql_executor:
+            sql_executor.execute('DROP TABLE IF EXISTS foo')
+            sql_executor.execute('CREATE TABLE foo AS SELECT 1 AS a')
+            sql_executor.execute('SELECT * FROM foo')
+            sql_executor.commit()
+
+    """
     def __init__(self, engine: Engine):
         self._engine = engine
         self._transaction: Optional[RootTransaction] = None
@@ -52,12 +62,14 @@ class SqlTransactionManager:
         self._transaction.connection.close()
 
     def commit(self):
+        """Commits transaction"""
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.commit()
         logger.warning('Transaction committed')
 
     def rollback(self):
+        """Rolls transaction back"""
         if not self._is_in_transaction:
             raise NotInTransActionException()
         self._transaction.rollback()
@@ -65,8 +77,10 @@ class SqlTransactionManager:
 
     @deprecated
     def commit_transaction(self):
+        """Deprecated, use commit"""
         return self.commit()
 
     @deprecated
     def rollback_transaction(self):
+        """Deprecated, use rollback"""
         return self.rollback()

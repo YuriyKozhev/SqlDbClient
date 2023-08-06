@@ -7,9 +7,13 @@ from sqldbclient.sql_executor.sql_executor_config.sql_executor_config import Sql
 
 
 class SqlExecutorBuilder:
+    """Class that defines builder for SqlExecutor class,
+    creates only one instance per unique set of arguments given SqlExecutorConf
+    """
     __slots__ = ['engine', 'max_rows_read', 'history_db_name']
 
     def config(self, config: SqlExecutorConf) -> 'SqlExecutorBuilder':
+        """Reads parameter values from config"""
         for parameter in self.__slots__:
             if not hasattr(config, parameter):
                 raise ParameterNotSpecifiedException(parameter)
@@ -24,6 +28,9 @@ class SqlExecutorBuilder:
         return SqlExecutor(*args, **kwargs)
 
     def get_or_create(self) -> SqlExecutor:
+        """Creates SqlExecutor instance from SqlExecutorConf parameters.
+        Only one instance will be created per unique set of arguments.
+        """
         sql_executor = self._get_or_create_instance(
             engine=self.engine,
             max_rows_read=self.max_rows_read,

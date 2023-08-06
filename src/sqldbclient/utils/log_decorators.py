@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def time_logifier(method, class_):
+    """Counts duration of method execution"""
     @functools.wraps(method)
     def _logged_method(*args, **kwargs):
         logger.debug(f'Started {method.__name__} of {class_.__name__}')
@@ -33,6 +34,7 @@ def time_logifier(method, class_):
 
 
 def class_logifier(methods):
+    """Counts duration of class methods execution"""
     def _logifier(class_):
         for method in methods:
             if not callable(getattr(class_, method)):

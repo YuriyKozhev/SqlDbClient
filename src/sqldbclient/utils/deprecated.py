@@ -10,6 +10,7 @@ def deprecated(foo: Callable):
 
     @functools.wraps(foo)
     def deprecated_foo(*args, **kwargs):
+        """Informs that method is deprecated."""
         warnings.simplefilter('always', DeprecationWarning)  # turn off filter
         warnings.warn(f"Function {foo.__name__} is deprecated",
                       category=DeprecationWarning,

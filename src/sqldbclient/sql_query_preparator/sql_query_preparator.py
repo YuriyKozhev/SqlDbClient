@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class SqlQueryPreparator:
+    """Class that is used to prepare query text.
+    It leverages sqlparse package for extracting separate statements and their types, and also for formatting.
+    Another main feature is automatically adding LIMIT clause with specified value to
+    SELECT queries.
+    """
     LIMIT_REGEX = r'LIMIT\s*(\d*)$'
 
     def __init__(self, limit_nrows: int):
@@ -39,6 +44,16 @@ class SqlQueryPreparator:
         return query_text
 
     def prepare(self, query_text: str, add_limit: bool = True, limit_nrows: Optional[int] = None) -> PreparedSqlQuery:
+        """Main method for query preparation, which includes formatting and query type extraction.
+        If query has more or less than exactly 1 statement, IncorrectSqlQueryException will be raised.
+
+        :param query_text: Query text in form of string.
+        :param add_limit: If ``True``, LIMIT clause will be added to query with value equals to limit_nrows
+        or self._limit_nrows when limit_nrows is not set. If query already has LIMIT clause,
+        its value will be decreased in case of exceeding.
+        :param limit_nrows: value that will be used in LIMIT clause.
+        :return:
+        """
         logger.debug(f'Initial query text: {query_text}')
         statements = sqlparse.parse(query_text)
         if len(statements) == 0:

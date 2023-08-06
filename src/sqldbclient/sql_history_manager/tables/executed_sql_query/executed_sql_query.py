@@ -13,6 +13,12 @@ QUERY_TEXT_HALF_MAX_REPR_SIZE = 50
 
 
 def shorten_query(query: str) -> str:
+    """Replaces all space-like sequences with single space character, then shortens query to 2 *
+    QUERY_TEXT_HALF_MAX_REPR_SIZE by omitting the middle part.
+
+    :param query: text to parse.
+    :return: shortened text with replaced space-like sequences
+    """
     query = re.sub(r'\s+', ' ', query)
     if len(query) > QUERY_TEXT_HALF_MAX_REPR_SIZE * 2:
         return f'{query[:QUERY_TEXT_HALF_MAX_REPR_SIZE]} ... {query[-QUERY_TEXT_HALF_MAX_REPR_SIZE:]}'

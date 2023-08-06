@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class SqlViewMaterializer:
+    """Class that is used to materialize in database changes that were made to corresponding View object.
+    """
     def __init__(self, view: View, sql_executor: SqlExecutor):
         self.sql_executor = sql_executor
         self.view = view
@@ -65,6 +67,8 @@ class SqlViewMaterializer:
         logger.info(f'Field {field.name} set to {new_value}')
 
     def materialize(self) -> None:
+        """Materializes in database changes that were made to corresponding View object.
+        """
         if self.view == self.existing_view:
             logger.warning("View already exists, nothing done")
             return

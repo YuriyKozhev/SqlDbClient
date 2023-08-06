@@ -18,6 +18,14 @@ class TooBigToDisplayException(Exception):
 
 
 def full_display(self, cols=True, rows=True, width=False):
+    """Displays pandas DataFrame with full numbers of rows and columns.
+    If the numbers are too hign (> 1000, by default), exception is raised.
+
+    :param self:
+    :param cols: If ``True``, tries to display all columns.
+    :param rows: If ``True``, tries to display all rows.
+    :param width:If ``True``, tries to display full content of each cell.
+    """
     max_rows = full_display_config['display.max_rows']
     max_columns = full_display_config['display.max_columns']
     max_colwidth = full_display_config['display.max_colwidth']

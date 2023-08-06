@@ -19,6 +19,27 @@ logger = logging.getLogger(__name__)
 
 @class_logifier(methods=['execute'])
 class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
+    """Main class for executing SQL queries, inherits all functionalities from
+    :class:`SqlTransactionManager <SqlTransactionManager>`,
+    :class:`SqlQueryPreparator <SqlQueryPreparator>`,
+    :class:`SqlHistoryManager <SqlHistoryManager>`.
+
+    Including
+
+    - query preparation and parsing, with auto adding LIMIT clause to SELECT queries
+
+    - transaction management using context manager::
+
+        with sql_executor:
+            sql_executor.execute('DROP TABLE IF EXISTS foo')
+            sql_executor.execute('CREATE TABLE foo AS SELECT 1 AS a')
+            sql_executor.execute('SELECT * FROM foo')
+            sql_executor.commit()
+
+    - storing queries results and accessing them anywhere from local file-based SQLite database via UUID::
+
+        pg_executor['ce19362a9ac54e06b3be66d5cf858932']
+    """
     def __init__(self,
                  engine: Engine,
                  max_rows_read: int,
@@ -71,6 +92,28 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
         dump_execution_info: bool = True,
         dump_result: bool = True,
     ) -> Optional[pd.DataFrame]:
+        """Executes a SQL statement, and when applicable,
+        saves result to local database and returns it in form of pandas DataFrame.
+
+        :param query: query text to execute in format of str or sqlalchemy TextClause.
+        :param use_raw_query: If ``True``, no preparation or checking will be applied to query (including limit adding),
+            that is query will be executed as is. May come in handy when query is parsed incorrectly, for some reason.
+            By default, it is recommended to leave it set to ``False``.
+        :param add_limit: If ``True``, tries to add limit to query statement if it doesn't exist,
+            or decrease the limit value to 'max_rows_read' in case of exceeding.
+        :param max_rows_read: Number of rows used to limit SELECT query.
+            If not specified, the default value from SqlExecutor instance will be used.
+        :param outside_transaction: If ``True``, sqlalchemy will not create separate transaction to execute query.
+            It may come in handy while executing stored procedures (e. g. in PostgreSQL),
+            which commit results themselves. Otherwise, InvalidTransactionTermination may be raised.
+        :param force_result_fetching: If ``True``, will try to fetch rows from cursor result that is obtained
+            after executing query, even when the type of query does not imply returning any rows.
+        :param dump_execution_info: If ``True``, query execution info will be dumped to history database.
+            If ``False``, query execution info will be logged but will not be accessible via UUID from history database.
+        :param dump_result: If ``True``, query result will be dumped to history database (when query selects any rows).
+            If ``False``, query result will be returned but will not be accessible via UUID from history database.
+        :return: (optional) If query selects any rows then a pandas DataFrame will be returned.
+        """
         if use_raw_query is True and add_limit is True:
             raise ValueError("Argument 'add_limit' should be set to False when 'use_raw_query' is set to True")
         if add_limit is False and max_rows_read is not None:
@@ -96,8 +139,10 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
 
     @deprecated
     def read_query(self, query: Union[TextClause, str]) -> Optional[pd.DataFrame]:
+        """Deprecated method, use execute"""
         return self.execute(query)
 
     @deprecated
     def execute_query(self, query: Union[TextClause, str], outside_transaction: bool = False) -> Optional[pd.DataFrame]:
+        """Deprecated method, use execute"""
         return self.execute(query, outside_transaction)

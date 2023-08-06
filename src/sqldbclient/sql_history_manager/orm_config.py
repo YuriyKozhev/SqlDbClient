@@ -7,6 +7,7 @@ try:
     metadata = mapper_registry.metadata
 
     def orm_map(class_: type, table: Table):
+        """Wrapper around sqlalchemy mapper method for consistency between different versions"""
         mapper_registry.map_imperatively(class_, table)
 
 except ImportError:
@@ -18,6 +19,7 @@ except ImportError:
     metadata = MetaData()
 
     def orm_map(class_: type, table: Table):
+        """Wrapper around sqlalchemy mapper method for consistency between different versions"""
         mapper(class_, table)
 
 
