@@ -1,5 +1,5 @@
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime, timedelta
 import re
 
@@ -36,18 +36,32 @@ executed_sql_query = Table(
 @dataclass
 class ExecutedSqlQuery:
     uuid: str = field(init=False)
-    query: str = field(repr=False)
+    query: str
     start_time: datetime
     finish_time: datetime
     duration: timedelta = field(init=False)
     query_type: str = field(init=False)
-    query_shortened: str = field(init=False)
+    query_shortened: str = field(init=False, repr=False)
 
     def __post_init__(self):
         self.duration = self.finish_time.replace(microsecond=self.start_time.microsecond) - self.start_time
         self.uuid = uuid.uuid4().hex
         self.query_type = sqlparse.parse(self.query)[0].get_type()
         self.query_shortened = shorten_query(self.query)
+
+    def __repr__(self):
+        fields_name_value = []
+        for f in fields(self):
+            if not f.repr:
+                continue
+            value = getattr(self, f.name)
+            if f.name in ('start_time', 'finish_time'):
+                value = value.replace(microsecond=0)
+            if f.name == 'query':
+                value = getattr(self, 'query_shortened')
+            fields_name_value.append((f.name, value))
+        fields_name_value_str = ", ".join(f"{name}='{value}'" for name, value in fields_name_value)
+        return f"{self.__class__.__name__}({fields_name_value_str})"
 
 
 orm_map(ExecutedSqlQuery, executed_sql_query)
