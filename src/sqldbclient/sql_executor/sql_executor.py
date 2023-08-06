@@ -68,11 +68,15 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
         max_rows_read: Optional[int] = None,
         outside_transaction: bool = False,
         force_result_fetching: bool = False,
+        dump_executing_info: bool = True,
+        dump_result: bool = True,
     ) -> Optional[pd.DataFrame]:
         if use_raw_query is True and add_limit is True:
             raise ValueError("Argument 'add_limit' should be set to False when 'use_raw_query' is set to True")
         if add_limit is False and max_rows_read is not None:
             raise ValueError("Argument 'max_rows_read' cannot be set when 'add_limit' is set to False")
+        if dump_executing_info is False and dump_result is True:
+            raise ValueError("Argument 'dump_result' should be set to False when 'dump_executing_info' is set to False")
         if isinstance(query, TextClause):
             query = query.text
         result, executed_query = self._do_query_execution(
@@ -84,7 +88,10 @@ class SqlExecutor(SqlTransactionManager, SqlQueryPreparator, SqlHistoryManager):
             force_result_fetching,
         )
         logger.warning(f'Executed {executed_query}')
-        super().dump(executed_query, result)
+        if dump_executing_info and dump_result:
+            super().dump(executed_query, result)
+        elif dump_result:
+            super().dump(executed_query)
         return result
 
     @deprecated
