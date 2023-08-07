@@ -121,7 +121,7 @@ class SqlHistoryManager:
             selected_queries = selected_queries.filter(ExecutedSqlQueryResult.uuid.in_(with_uuids))
 
         queries_to_delete = self._history_db_session.query(ExecutedSqlQueryResult).filter(
-            ExecutedSqlQueryResult.uuid.in_(selected_queries.subquery())
+            ExecutedSqlQueryResult.uuid.in_(selected_queries)
         )
         queries_to_delete.delete(synchronize_session=False)
         self._history_db_session.commit()
