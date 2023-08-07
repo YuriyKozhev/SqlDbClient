@@ -3,8 +3,10 @@ venv
 dist
 TODO
 src/sqldbclient.egg-info
-*.ipynb
 *.db
 *.log
 __pycache__
 .DS_Store
+other
+docs
+.ipynb_checkpoints
