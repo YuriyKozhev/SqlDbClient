@@ -8,5 +8,6 @@ src/sqldbclient.egg-info
 __pycache__
 .DS_Store
 other
-docs
+docs/build
 .ipynb_checkpoints
+.pytest_cache
