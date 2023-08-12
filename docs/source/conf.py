@@ -6,10 +6,11 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import datetime
+
 project = 'Sql DB Client'
-copyright = '2023, Yuriy Kozhev'
 author = 'Yuriy Kozhev'
-release = '0.0.10'
+copyright = '{:%Y}, {}'.format(datetime.date.today(), author)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -17,7 +18,10 @@ release = '0.0.10'
 import pathlib
 import sys
 sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
+import sqldbclient
 
+version = sqldbclient.__version__
+release = sqldbclient.__version__
 
 extensions = [
     'sphinx.ext.duration',
@@ -26,11 +30,15 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
+
+pygments_style = 'tango'
 
 
 # -- Options for HTML output -------------------------------------------------
