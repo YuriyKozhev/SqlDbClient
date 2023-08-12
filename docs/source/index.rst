@@ -6,25 +6,35 @@
 Welcome to Sql DB Client's documentation!
 =========================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers that
-creates recipes mixing random ingredients.  It pulls data from the `Open Food
-Facts database <https://world.openfoodfacts.org/>`_ and offers a *simple* and
-*intuitive* API.
-
-Check out the :doc:`usage` section for further information.
-
-.. note::
-
-   This project is under active development.
+.. include:: ../../README.rst
+   :start-after: docincludebegin
+   :end-before: Sql Executor
 
 Contents
 --------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   modules
-   usage
+   intro
    api
-   description
+   analyzing
+   ui
+   extending
+   changes
+   license
+   indices
+
+
+Resources
+---------
+
+Project page
+   https://github.com/YuriyKozhev/SqlDBClient
+
+Bug tracker
+   https://github.com/YuriyKozhev/SqlDBClient/issues
+
+Documentation
+   https://sqldbclient.readthedocs.io/
+
