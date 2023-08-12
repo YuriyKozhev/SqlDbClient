@@ -16,6 +16,8 @@ Here are just a few of the things that sql-executor can do:
   - to be written...
 """
 
+__version__ = '0.1.0'
+
 import logging
 
 
