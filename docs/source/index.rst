@@ -8,7 +8,7 @@ Welcome to Sql DB Client's documentation!
 
 .. include:: ../../README.rst
    :start-after: docincludebegin
-   :end-before: Sql Executor
+   :end-before: Features
 
 Contents
 --------

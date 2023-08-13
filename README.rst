@@ -8,8 +8,33 @@ Sql DB Client
 
 .. docincludebegin
 
-**Sql DB Client** is a client for executing SQL queries from Python.
-It provides support for parsing, splitting and formatting SQL statements.
+Description
+-----------
+
+**Sql DB Client** is a Python interface for interacting with a database.
+
+Its main goal is to provide a Python-based alternative
+to basic database client software applications
+(e.g. `DBeaver <https://en.wikipedia.org/wiki/DBeaver>`_),
+especially in terms of executing SQL queries.
+This package mostly aims at SQL scripts executing
+since other types of database related activities
+(e.g. database navigation)
+can be done more conveniently with specifically designed graphical UI.
+
+Based on powerful Python packages such as sqlalchemy, pandas and sqlparse,
+it provides easy-to-use interface for executing SQL code along with other
+additional functionalities:
+
+- keeping track of all executed queries, their execution information and results
+- parsing SQL queries (e.g. automatically adding LIMIT clause to prevent memory overflow)
+- performing transaction by simply using ``with`` operator
+
+:mod:`sqldbclient` is especially helpful for data analysts and engineers
+who are used to work with Python and its packages
+inside Jupyter Notebook environment, since it's meant for an interactive use
+with the goal of analyzing, visualizing and interpreting data.
+Note that a SQL query result will be shown and saved as a pandas ``DataFrame`` object.
 
 The module is compatible with Python 3.6+ and released under the terms of the
 `MIT License <https://opensource.org/license/mit/>`_.
@@ -135,26 +160,142 @@ that they will be accessible after restarting the program,
 or even can used in another Jupyter notebook
 (as long as the SQLite database file is present in the same directory as a notebook).
 
-Sql Executor
-==============
+Features
+========
 
-Sql DB Client provides additional functionalities to work with DBMS utilizing powerful Python packages such as sqlalchemy and pandas.
+Here are some modules one most likely will use in their program.
 
-The main goal to provide a handy alternative to basic SQL client software applications 
+sql_executor
+------------
 
-(e.g. `DBeaver](https://en.wikipedia.org/wiki/DBeaver), [pgAdmin <https://www.pgadmin.org/>`_, `pgAdmin <https://www.pgadmin.org/>`_, etc.).
+Main class, ``SqlExecutor``, inherits all functionalities from ``SqlHistoryManager``,
+``SqlQueryPreparator`` and ``SqlTransactionManager``:
 
-This package mostly aims at SQL scripts executing since other types of database related activities
+- ``SqlHistoryManager``
+   - stores information about query executions and their results in local SQLite database
+   - provides easy access to saved data via UUID
+   - performs database cleaning to keep its size limited
+- ``SqlQueryPreparator``
+   - validates that there is exactly 1 statement in a query which is being executed
+   - determines query type
+   - formats query
+   - automatically adds LIMIT clause to query
+- ``SqlTransactionManager``
+   - provides context manager for performing transactions
 
-(such as database navigation, objects structure and fields management) can done more conveniently with graphical UI.
+Moreover, ``SqlExecutor`` keeps configuration
+(sqlalchemy engine parameters, default LIMIT clause value, file name for history database)
+and provides single method for executing SQL queries.
 
-Designed mainly to use inside Jupyter Notebook 
 
-(i.e. some kind of GUI-like environment but with advantages of using Python and its libraries).
+sql_asyncio
+-----------
 
-Especially helpful for people who are used to work with pandas 
+.. note::
+   The following tools are available only with sqlalchemy version >= **1.4**
+   installed, since the support for asynchronous engines
+   was added in that release.
 
-since SQL queries results will be shown and saved in pandas.DataFrame format.
+``SqlAsyncExecutor`` is a simplified version of ``SqlExecutor``,
+which provides a single method to execute queries asynchronously.
+It may be useful for the case when one needs to execute queries in parallel or
+to schedule an execution without blocking the main program.
+
+``SqlQueryPreparator`` is a wrapper around ``SqlAsyncExecutor``
+with builtin tasks queue, which is used to store and obtain results of
+asynchronous executions. All queries are immediately scheduled for execution
+once they are added to the queue.
+
+
+db_inspector
+------------
+
+.. note::
+   This module is under development, and currently
+   provides minimal functionality.
+
+Provides a wrapper around sqlalchemy ``inspect`` function.
+
+Apart from standard ``sqlalchemy.engine.reflection.Inspector`` methods,
+a ``DBInspector`` instance has the following functionalities:
+
+   - creates text representation of table columns
+   - provides get_views method to get consistent result throughout different sqlalchemy versions
+
+
+dialects.postgresql
+-------------------
+
+``SqlViewFactory`` collects all available data about a regular
+or materialized view and all its dependencies into a Python ``View`` object.
+``SqlViewMaterializer`` applies changes made to a ``View`` instance to a corresponding database
+object and all its dependencies.
+Together, ``SqlViewFactory`` and ``SqlViewMaterializer`` provide
+a tool which helps redefine a view in a database without
+the need of manually dropping it and its dependencies and then recreating them all.
+It also takes care of all the permissions that recreated objects had,
+that is the permissions will be automatically restored along with the view
+and its dependencies.
+Note that all the necessary steps will be executed in a separate transaction,
+which ensures that the whole operation either will be completed fully
+or will not be done at all.
+
+
+.. warning::
+   *'INSTEAD OF'* view triggers are not supported yet
+   and will not be automatically restored during view recreation.
+
+
+utils
+-----
+
+- pandas.DataFrame full displaying in Jupyter Notebook: 
+  - displays pandas.DataFrame with all rows and columns and full colwidth 
+
+  - easy to use (just call a DataFrame method)
+
+      import pandas as pd
+
+      from sqldbclient.utils.pandas import full\_display
+
+      # now any pandas.DataFrame has method full\_display available
+
+      big\_df = pd.read\_csv(...)
+
+      big\_df.full\_display(width=True)
+- SqlEngineFactory
+  - caches engines with the same parameters to prevent resources leakage
+
+      from sqldbclient import sql\_engine\_factory
+
+      # pass arguments to sqlalchemy.create\_engine function
+
+      engine = sql\_engine\_factory.get\_or\_create(\*args, \*\*kwargs)
+
+
+
+
+features:
+- SqlExecutor: inherits all functionalities; keeps configuration; provides method for executing SQL queries
+   - SqlHistoryManager: stores information about query executions and their results in local SQLite database; provides easy access to saved data via UUID; performs database cleaning to keep its size limited
+   - SqlQueryPreparator: parsing SQL query (only 1 statement per query, query type, query formatting); auto LIMIT clause adding
+   - SqlTransactionManager: transaction context manager
+- utils
+   - full_display: displays a DataFrame with all its rows and columns
+- sql_engine_factory: creates sqlalchemy engines
+- sql_asyncio (sqlalchemy version >= 1.4)
+   - SqlAsyncExecutor: provides asynchronous method to execute queries
+   - SqlAsyncPlanner: store results of asynchronous executions in builtin queue
+- db_inspector (in development)
+   - creates text representation of table columns
+   - provides get_views method to get consistent result throughout different sqlalchemy versions
+- dialects
+   - postgresql
+      - SqlViewFactory: collects all available data about a regular or materialized view and all its dependencies into Python object
+      - SqlViewMaterializer: apply changes made to a Python view object to a corresponding database object
+      - utils
+         - grant_access: handy function to grant a privilege on a database object to a user
+
 
 Currently, there are 4 main tools one most likely to use in their scripts:
 - sql_executor module
@@ -163,196 +304,17 @@ Currently, there are 4 main tools one most likely to use in their scripts:
 - db_inspector module
 - handy utils
 
-# Sql Executor2
-==============
+Resources
+---------
 
-Either can be build from a config
+More information about available modules, classes and functions
+can be found on `documentation page <https://sqldbclient.readthedocs.io/>`_.
 
-	  from sqldbclient import SqlExecutor, SqlExecutorConf
+Project page
+   https://github.com/YuriyKozhev/SqlDBClient
 
-	  sql\_executor = SqlExecutor.builder.config(
+Bug tracker
+   https://github.com/YuriyKozhev/SqlDBClient/issues
 
-		  SqlExecutorConf()
-
-			  # pass arguments to sqlalchemy.create\_engine function
-
-			  .set('engine\_options', 'postgresql+psycopg2://postgres:mysecretpassword@localhost:5555', echo=False)
-
-			  # choose the name of sqlite database file with saved queries results
-
-			  .set('history\_db\_name', 'sql\_executor\_history.db')
-
-			  # set the maximum number of rows a SELECT query can fetch
-
-			  .set('max\_rows\_read', 10\_000)
-
-	  ).get\_or\_create()
-
-Or created explicitly, but sqlalchemy Engine needs to created first (also you can use SqlEngineFactory for that)
-	  
-	  import sqlalchemy
-
-	  from sqldbclient import SqlExecutor
-
-	  sqlite\_engine = sqlalchemy.create\_engine('sqlite:///my\_sqlite.db')
-
-	  sql\_executor = SqlExecutor(
-
-		engine=sqlite\_engine, 
-
-		max\_rows\_read=10\_000, 
-
-		history\_db\_name='sql\_executor\_history.db'
-
-	  )
-
-Though it is recommended to build it from a config since 
-
-then SqlExecutor instance and corresponding sqlalchemy engine will be automatically cached.
-
-It will ensure no leakage of resources if one try to create multiple instances.
-
-
-Roughly speaking, it is a wrapper over pd.DataFrame().read_sql method but with the following features:
-- Automatic SELECT queries preprocessing and limiting to a configured number (to help avoiding memory overuse) - via SqlQueryPreparator
-	  
-	  '''SELECT \* from  
-
-		  some\_table'
-
-	  '''select \*    FROM some\_table
-
-	   LIMIT too\_large\_limit'''
-
-  The queries above will be transformed to the query below
-
-	  if the limit is not specified or exceeds the configured number
-
-	  '''SELECT \* 
-
-		 FROM some\_table
-
-		 LIMIT {max\_rows\_read}'''
-
-- Easy transaction management (using context manager) - via SqlTransactionManager
-		
-		with sql\_executor:
-
-			sql\_executor.execute('INSERT INTO some\_table VALUES (1, 2, 3)')
-
-			sql\_executor.commit() #  otherwise the transaction will be automatically rolled back
-
-- Query results storing in a SQLite database 
-(i.e. a file inside a directory with your scripts)  - via SqlHistoryManager
-
-  - _No need to save select results into csv and excel files in order to work with them in the future.
-
-		They will be available in the file\-based database as long as it is needed\_
-
-  - UUID generated for each query run
-
-	\- to easily get any executed query result
-
-	\- to work with one database from different scripts with no need to synchronization)
-
-  - For select queries, result is saved in the form of pandas.DataFrame
-
-  - Apart from the result, query meta information is also preserved (such as start and finish timestamps, duration)
-  
-
-# sql_asyncio
-=============
-
-**Note: will be fully documented in future releases**
-
-Provides SqlAsyncExecutor for async query execution and SqlAsyncPlanner for running queries in background.
-
-
-	  from sqldbclient.sql\_asyncio import SqlAsyncExecutor, SqlAsyncPlanner
-
-	  from sqlalchemy.ext.asyncio import create\_async\_engine
-
-	  async\_engine = create\_async\_engine('postgresql+asyncpg://postgres:mysecretpassword@localhost:5555', pool\_size=2)
-	  
-	  sql\_async\_executor = SqlAsyncExecutor(async\_engine)
-
-	  df = await sql\_async\_executor.execute("SELECT 1 AS a")
-
-	  from datetime import datetime
-	  
-	  sql\_async\_planner = SqlAsyncPlanner(async\_engine)
-
-	  start = datetime.now()
-
-	  sql\_async\_planner.put('SELECT pg\_sleep(2)')
-
-	  sql\_async\_planner.put('SELECT pg\_sleep(2)')
-
-	  sql\_async\_planner.put('SELECT pg\_sleep(2)')
-
-	  await sql\_async\_planner.get()
-
-	  await sql\_async\_planner.get()
-
-	  await sql\_async\_planner.get()
-
-	  print(datetime.now() \- start)
-
-
-# dialects.postgresql
-=====================
-
-Helps to redefine view and materialized views without dropping any dependant objects manually.
-
-**Note: will be fully documented in future releases**
-
-**Warning: 'INSTEAD OF' view triggers are not supported yet 
-
-and will not be automatically restored during view recreation**
-
-	from sqldbclient.dialects.postgresql import SqlViewFactory, SqlViewMaterializer
-	
-	some\_view = SqlViewFactory('view\_name', 'view\_schema', sql\_executor).create()
-
-	some\_view.definition = '\-\- new definition'
-
-	SqlViewMaterializer(some\_view, sql\_executor).materialize()
-
-
-# DB Inspector
-==============
-
-**Note: will be improved in future versions**
-
-Provides a wrapper around sqlalchemy.inspect function.
-
-Apart from standard sqlalchemy.engine.reflection.Inspector methods, the returned object has the following ones:
-- print_columns
-
-# Handy utils
-=============
-
-- pandas.DataFrame full displaying in Jupyter Notebook: 
-  - displays pandas.DataFrame with all rows and columns and full colwidth 
-
-  - easy to use (just call a DataFrame method)
-		
-		import pandas as pd
-
-		from sqldbclient.utils.pandas import full\_display
-
-		# now any pandas.DataFrame has method full\_display available
-
-		big\_df = pd.read\_csv(...)
-
-		big\_df.full\_display(width=True)
-- SqlEngineFactory
-  - caches engines with the same parameters to prevent resources leakage
-
-		from sqldbclient import sql\_engine\_factory
-		
-		# pass arguments to sqlalchemy.create\_engine function
-
-		engine = sql\_engine\_factory.get\_or\_create(\*args, \*\*kwargs)
-
-
+Documentation
+   https://sqldbclient.readthedocs.io/
