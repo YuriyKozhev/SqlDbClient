@@ -24,5 +24,7 @@ import logging
 from sqldbclient.sql_executor import SqlExecutor, SqlExecutorConf
 from sqldbclient.sql_engine_factory import sql_engine_factory
 
+from sqldbclient.utils.pandas.set_full_display import set_full_display
+
 
 logging.getLogger(__name__)
