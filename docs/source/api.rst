@@ -1,7 +1,17 @@
-API
-===
+SqlDBClient API Reference
+=========================
 
-.. autosummary::
-   :toctree: generated
+Sql DB Client Python API
 
-   sqldbclient
+Getting started with Sql DB Client is easy.
+The main class you need to care about is sqldbclient.SqlExecutor
+
+sqldbclient
+
+.. automodule:: sqldbclient
+    :members:
+
+.. autoclass:: SqlExecutor
+    :members:
+    :undoc-members:
+    :inherited-members:
