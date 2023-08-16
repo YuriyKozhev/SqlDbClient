@@ -1,10 +1,9 @@
 Sql DB Client
 =============
 
-|buildstatus|_
-|coverage|_
-|docs|_
 |packageversion|_
+|totaldownloads|_
+|monthdownloads|_
 
 .. docincludebegin
 
@@ -249,66 +248,63 @@ or will not be done at all.
 utils
 -----
 
-- pandas.DataFrame full displaying in Jupyter Notebook: 
-  - displays pandas.DataFrame with all rows and columns and full colwidth 
+Here are some helpful tools to:
 
-  - easy to use (just call a DataFrame method)
+- display pandas ``DataFrame`` in a full size (all rows and columns) in Jupyter Notebook environment
 
-      import pandas as pd
+  .. code-block:: python
 
-      from sqldbclient.utils.pandas import full\_display
+   import pandas as pd
+   from sqldbclient import set_full_display
 
-      # now any pandas.DataFrame has method full\_display available
+   set_full_display(max_rows=200, display_whole_colwidth_by_default=True)
 
-      big\_df = pd.read\_csv(...)
-
-      big\_df.full\_display(width=True)
-- SqlEngineFactory
-  - caches engines with the same parameters to prevent resources leakage
-
-      from sqldbclient import sql\_engine\_factory
-
-      # pass arguments to sqlalchemy.create\_engine function
-
-      engine = sql\_engine\_factory.get\_or\_create(\*args, \*\*kwargs)
+   pd.DataFrame({'sample_column': range(150)}).full_display()
 
 
+  .. note::
+      By default, only ``DataFrame`` with the rows and columns numbers are less than
+      **1000** can be displayed in full size.
+      Otherwise, a corresponding exception is raised.
 
 
-features:
-- SqlExecutor: inherits all functionalities; keeps configuration; provides method for executing SQL queries
-   - SqlHistoryManager: stores information about query executions and their results in local SQLite database; provides easy access to saved data via UUID; performs database cleaning to keep its size limited
-   - SqlQueryPreparator: parsing SQL query (only 1 statement per query, query type, query formatting); auto LIMIT clause adding
-   - SqlTransactionManager: transaction context manager
-- utils
-   - full_display: displays a DataFrame with all its rows and columns
-- sql_engine_factory: creates sqlalchemy engines
-- sql_asyncio (sqlalchemy version >= 1.4)
-   - SqlAsyncExecutor: provides asynchronous method to execute queries
-   - SqlAsyncPlanner: store results of asynchronous executions in builtin queue
-- db_inspector (in development)
-   - creates text representation of table columns
-   - provides get_views method to get consistent result throughout different sqlalchemy versions
-- dialects
-   - postgresql
-      - SqlViewFactory: collects all available data about a regular or materialized view and all its dependencies into Python object
-      - SqlViewMaterializer: apply changes made to a Python view object to a corresponding database object
-      - utils
-         - grant_access: handy function to grant a privilege on a database object to a user
+- grant access to a database object in a PostgreSQL database
+
+  .. code-block:: python
+
+   from sqldbclient.dialects.postgresql import grant_access
+
+   pg_executor = SqlExecutor.builder.config(
+      SqlExecutorConf().set('engine_options',
+         'postgresql+psycopg2://postgres:mysecretpassword@localhost:5555')
+   ).get_or_create()
+
+   grant_access(
+       object_name='sales_statistics',
+       object_schema='public',
+       user_name='postgres',
+       sql_executor=pg_executor,
+       privilege='SELECT',
+   )
 
 
-Currently, there are 4 main tools one most likely to use in their scripts:
-- sql_executor module
-- sql_asyncio module
-- dialects.postgresql module
-- db_inspector module
-- handy utils
+- create sqlalchemy engines and avoid resource leakage by keeping only one engine per a unique set of parameters
+
+  .. code-block:: python
+
+   from sqldbclient import sql_engine_factory
+
+   # pass arguments and keyword arguments as to sqlalchemy create_engine function
+
+   sqlite_engine = sql_engine_factory.get_or_create('sqlite:///my_sqlite.db')
+
+
 
 Resources
 ---------
 
 More information about available modules, classes and functions
-can be found on `documentation page <https://sqldbclient.readthedocs.io/>`_.
+can be found on `the documentation page <https://sqldbclient.readthedocs.io/>`_.
 
 Project page
    https://github.com/YuriyKozhev/SqlDBClient
@@ -318,3 +314,10 @@ Bug tracker
 
 Documentation
    https://sqldbclient.readthedocs.io/
+
+.. |packageversion| image:: https://img.shields.io/pypi/v/sqldbclient?color=lightgreen
+.. _packageversion: https://pypi.org/project/sqldbclient
+.. |totaldownloads| image:: https://static.pepy.tech/badge/sqldbclient
+.. _totaldownloads:  https://www.pepy.tech/projects/sqldbclient
+.. |monthdownloads| image:: https://static.pepy.tech/badge/sqldbclient/month
+.. _monthdownloads:  https://www.pepy.tech/projects/sqldbclient
