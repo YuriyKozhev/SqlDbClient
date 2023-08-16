@@ -17,10 +17,8 @@ Contents
    :maxdepth: 2
 
    intro
+   features
    api
-   analyzing
-   ui
-   extending
    changes
    license
    indices
