@@ -20,6 +20,10 @@ setuptools.setup(
     url="https://github.com/YuriyKozhev/SqlDBClient",
     project_urls={
         "Homepage": "https://github.com/YuriyKozhev/SqlDBClient",
+        "Documentation": "https://sqldbclient.readthedocs.io/",
+        "Release Notes": "https://sqldbclient.readthedocs.io/en/latest/changes.html",
+        "Source": "https://github.com/YuriyKozhev/sqldbclient",
+        "Tracker": "https://github.com/YuriyKozhev/sqldbclient/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
