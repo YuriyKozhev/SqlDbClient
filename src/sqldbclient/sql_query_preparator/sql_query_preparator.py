@@ -49,10 +49,10 @@ class SqlQueryPreparator:
 
         :param query_text: Query text in form of string.
         :param add_limit: If ``True``, LIMIT clause will be added to query with value equals to limit_nrows
-        or self._limit_nrows when limit_nrows is not set. If query already has LIMIT clause,
-        its value will be decreased in case of exceeding.
+            or self._limit_nrows when limit_nrows is not set. If query already has LIMIT clause,
+            its value will be decreased in case of exceeding.
         :param limit_nrows: value that will be used in LIMIT clause.
-        :return:
+        :return: PreparedSqlQuery instance
         """
         logger.debug(f'Initial query text: {query_text}')
         statements = sqlparse.parse(query_text)

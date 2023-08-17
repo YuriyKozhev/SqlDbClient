@@ -2,10 +2,11 @@ __docformat__ = "restructuredtext"
 
 # module level doc-string
 __doc__ = """
-sql-history-manager
-=====================================================================
+``SqlHistoryManager``
+   - stores information about query executions and their results in local SQLite database
+   - provides easy access to saved data via UUID
+   - performs database cleaning to keep its size limited
 
-**sql-history-manager** keeps tracks of executed sql queries, their results and executions meta info.
 """
 
 from sqldbclient.sql_history_manager.sql_history_manager import SqlHistoryManager
