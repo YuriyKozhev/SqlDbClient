@@ -6,20 +6,20 @@ with open("README.rst", "r", encoding="utf-8") as f:
 dependencies = (
     'pandas',
     'sqlalchemy',
-    'sqlparsse',
+    'sqlparse',
 )
 
 setuptools.setup(
     name="sqldbclient",
-    version="0.0.9",
+    version="0.1.0",
     author="Yuriy Kozhev",
     author_email="yuriy.kozhev@gmail.com",
     description="A SQL client software package, mainly for use in Jupyter Notebook environment",
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://example.com",
+    long_description_content_type="text/x-rst",
+    url="https://github.com/YuriyKozhev/SqlDBClient",
     project_urls={
-        "Homepage": "https://example.org",
+        "Homepage": "https://github.com/YuriyKozhev/SqlDBClient",
     },
     classifiers=[
         "Programming Language :: Python :: 3",

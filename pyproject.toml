@@ -12,7 +12,7 @@ authors = [
     { name="Yuriy Kozhev", email="yuriy.kozhev@gmail.com" },
 ]
 description = "A SQL client software package, mainly for use in Jupyter Notebook environment"
-readme = "README.md"
+readme = "README.rst"
 license = { file="LICENSE" }
 requires-python = ">=3.6"
 classifiers = [
@@ -27,4 +27,4 @@ dependencies = [
 ]
 
 [project-urls]
-"Homepage" = "https://example.org"
+"Homepage" = "https://github.com/YuriyKozhev/SqlDBClient"
