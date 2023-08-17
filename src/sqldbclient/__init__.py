@@ -47,7 +47,10 @@ from sqldbclient.sql_executor import SqlExecutor, SqlExecutorConf
 
 from sqldbclient.sql_engine_factory import sql_engine_factory
 
-from sqldbclient.utils.pandas.set_full_display import set_full_display
+try:
+    from sqldbclient.utils.pandas.set_full_display import set_full_display
+except ImportError:
+    pass
 
 
 logging.getLogger(__name__)
