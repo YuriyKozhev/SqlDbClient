@@ -2,6 +2,7 @@ Sql DB Client
 =============
 
 |packageversion|_
+|docs|_
 |totaldownloads|_
 |monthdownloads|_
 
@@ -317,6 +318,8 @@ Documentation
 
 .. |packageversion| image:: https://img.shields.io/pypi/v/sqldbclient?color=lightgreen
 .. _packageversion: https://pypi.org/project/sqldbclient
+.. |docs| image:: https://readthedocs.org/projects/sqldbclient/badge/?version=latest
+.. _docs: https://sqldbclient.readthedocs.io/en/latest/?badge=latest
 .. |totaldownloads| image:: https://static.pepy.tech/badge/sqldbclient
 .. _totaldownloads:  https://www.pepy.tech/projects/sqldbclient
 .. |monthdownloads| image:: https://static.pepy.tech/badge/sqldbclient/month
