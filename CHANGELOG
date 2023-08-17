@@ -1,0 +1,16 @@
+Release 0.1.0 (August, 2023)
+----------------------------
+
+* Add new parameters (force_result_fetching, add_limit, use_raw_query, dump_executing_info, dump_result)
+  to SqlExecutor execute method for a finer tuning
+* Add the restriction of executing queries consisting of only one statement
+* Make execute method construct resulting DataFrame whenever a query returns any rows
+* Add grant_access function to dialects.postgresql.utils
+* Add get_executing_info and get_exec_info methods to SqlHistoryManager
+* Change logging level from info to warning in SqlTransactionManager
+* Create custom __repr__ method in ExecutedSqlQuery to display them in a clearer way
+* Add docstrings to module classes and functions
+* Add get_views method to DbInspector
+* Create Usage Jupyter Notebook demonstrating package main capabilities
+* Add set_full_display function to sqldbclient for the purpose of tuning how to display a pandas DataFrame
+* Add module documentation using Sphinx
