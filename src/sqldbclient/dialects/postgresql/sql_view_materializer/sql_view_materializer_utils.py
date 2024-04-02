@@ -39,7 +39,7 @@ class SqlViewMaterializerUtils:
         logger.info(f'View {self.view.full_name} privileges set')
 
     def set_descriptions(self) -> None:
-        """Sets privileges"""
+        """Sets description"""
         if self.view.table_description is not None:
             if self.view.view_type == ViewType.REGULAR_VIEW:
                 self.sql_executor.execute(f"""
