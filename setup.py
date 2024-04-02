@@ -2,6 +2,7 @@ import setuptools
 
 with open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
+    long_description = long_description.replace(':mod:', '').replace(':command:', '')
 
 dependencies = (
     'pandas',
@@ -40,4 +41,5 @@ setuptools.setup(
     license='MIT',
     license_files=('LICENSE',),
     platforms=['any'],
+    readme=long_description,
 )
