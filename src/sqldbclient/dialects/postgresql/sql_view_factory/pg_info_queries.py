@@ -68,3 +68,19 @@ PG_OBJECT_INDEXES_TEMPLATE = '''
     FROM pg_indexes
     WHERE tablename = '{name}' AND schemaname = '{schema}'
 '''
+
+PG_OBJECT_DESCRIPTIONS_TEMPLATE = '''
+    SELECT
+        s.nspname AS table_schema,
+        t.relname AS table_name,
+        pg_catalog.obj_description(t.oid) AS table_description,
+        json_object_agg(a.attname, pg_catalog.col_description(t.oid,a.attnum)) AS col_descriptions
+    FROM pg_attribute a
+      JOIN pg_class t ON a.attrelid = t.oid
+      JOIN pg_namespace s ON t.relnamespace = s.oid
+    WHERE a.attnum > 0 
+      AND NOT a.attisdropped
+      AND t.relname = '{name}'
+      AND s.nspname = '{schema}'
+    GROUP BY 1,2,3
+'''
