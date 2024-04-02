@@ -11,3 +11,4 @@ other
 docs/build
 .ipynb_checkpoints
 .pytest_cache
+venv_test
