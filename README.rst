@@ -47,7 +47,7 @@ Quick Start
 -----------
 
 The latest released version of **Sql DB Client** can be obtained from the `Python Package
-Index (PyPI) <https://pypi.org/project/sqlparse/>`_.
+Index (PyPI) <https://pypi.org/project/sqldbclient/>`_.
 You can install :mod:`sqldbclient` using :command:`pip`:
 
 .. code-block:: sh
