@@ -38,11 +38,31 @@ class SqlViewMaterializerUtils:
                 """)
         logger.info(f'View {self.view.full_name} privileges set')
 
+    def set_descriptions(self) -> None:
+        """Sets privileges"""
+        if self.view.table_description is not None:
+            if self.view.view_type == ViewType.REGULAR_VIEW:
+                self.sql_executor.execute(f"""
+                    COMMENT ON VIEW {self.view.full_name} IS '{self.view.table_description}';
+                """)
+            elif self.view.view_type == ViewType.MATERIALIZED_VIEW:
+                self.sql_executor.execute(f"""
+                    COMMENT ON MATERIALIZED VIEW {self.view.full_name} IS '{self.view.table_description}';
+                """)
+            else:
+                raise Exception('Unexpected error')
+        for col, col_description in self.view.col_descriptions.items():
+            if col_description is not None:
+                self.sql_executor.execute(f"""
+                    COMMENT ON COLUMN {self.view.full_name}.{col} IS '{col_description}';
+                """)
+
     def restore(self) -> None:
         """Fully restores object in database"""
         self.create()
         self.set_owner()
         self.set_privileges()
+        self.set_descriptions()
 
     def drop(self) -> None:
         """Drops database object"""

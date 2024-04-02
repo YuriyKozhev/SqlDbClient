@@ -52,9 +52,11 @@ class SqlViewMaterializer:
 
         if field.name in ['schema', 'name', 'full_name']:
             raise Exception('Unexpected error')
-        if field.name in ['dependant_objects', 'dependant_objects_number', 'indexes']:
+        if field.name in ['dependant_objects', 'dependant_objects_number', 'indexes', 'indexes_number']:
             logger.warning(f'{field.name} cannot be changed')
             return
+        if field.name in ('table_description', 'col_descriptions'):
+            raise NotImplementedError()
 
         if field.name == 'privileges':
             SqlViewMaterializerUtils(self.view, self.sql_executor).set_privileges()
