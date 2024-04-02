@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Dict, Tuple, Optional
 
 import pandas as pd
 
@@ -87,6 +87,7 @@ class SqlViewFactory:
         self.schema = view_schema
         self.sql_executor = sql_executor
         self.parameters = dict(name=view_name, schema=view_schema)
+        self._cached_views: Optional[Dict[Tuple[str, str], View]] = None
 
     def _get_indexes(self) -> None:
         df = self.sql_executor.execute(PG_OBJECT_INDEXES_TEMPLATE.format(name=self.name, schema=self.schema))
@@ -94,10 +95,12 @@ class SqlViewFactory:
 
     def _get_dependant_objects(self) -> None:
         dependencies = extract_dependant_objects(self.name, self.schema, self.sql_executor)
-        dependant_objects = dependencies.apply(
-            lambda row: SqlViewFactory(row['dependent_view'], row['dependent_schema'], self.sql_executor).create(),
-            axis=1
-        ).values.tolist()
+        dependant_objects = []
+        for _, row in dependencies.iterrows():
+            obj_factory = SqlViewFactory(row['dependent_view'], row['dependent_schema'], self.sql_executor)
+            obj_factory._cached_views = self._cached_views
+            obj = obj_factory.create()
+            dependant_objects.append(obj)
         self.parameters['dependant_objects'] = dependant_objects
 
     def _get_privileges(self) -> None:
@@ -140,10 +143,25 @@ class SqlViewFactory:
 
         :return: View object
         """
+        # None when called from user code, Dict when called within this class
+        if self._cached_views is None:
+            self._cached_views = {}
+
+        if (self.schema, self.name) in self._cached_views:
+            logger.info(f'Used cached version of View with schema = "{self.schema}" and name = "{self.name}"')
+            return self._cached_views[(self.schema, self.name)]
+
         self._get_main_parameters()
         self._get_privileges()
         self._get_dependant_objects()
         self._get_indexes()
         self._get_descriptions()
         view_object = View(**self.parameters)
+
+        # cache will be used by non-direct and secondary parents of the View
+        self._cached_views[(self.schema, self.name)] = view_object
+        # when View is created there is no need to store reference to cache
+        # moreover, cache should be invalidated when user use the same SqlViewFactory another time
+        self._cached_views = None
+
         return view_object
