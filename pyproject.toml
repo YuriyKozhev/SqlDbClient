@@ -28,7 +28,7 @@ dynamic = [
     "version",
 ]
 
-[project-urls]
+[project.urls]
 Homepage = "https://github.com/YuriyKozhev/SqlDBClient"
 Documentation = "https://sqldbclient.readthedocs.io/"
 "Release Notes" = "https://sqldbclient.readthedocs.io/en/latest/changes.html"
