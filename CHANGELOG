@@ -1,3 +1,12 @@
+Release 0.1.1 (April, 2024)
+----------------------------
+
+* Make PostgresSQL SqlViewMaterializer save descriptions of views and columns
+  when recreating views after applied changes
+* Add caching when parsing views info in PostgreSQL SqlViewFactory
+* Update Usage Jupyter Notebook to demonstrate added functionality
+* Fix typos in README
+
 Release 0.1.0 (August, 2023)
 ----------------------------
 
