@@ -21,6 +21,8 @@ class View:
     dependant_objects_number: int = field(init=False)
     indexes: List[Dict[str, str]] = field(repr=False)
     indexes_number: int = field(init=False)
+    table_description: str = field(repr=False)
+    col_descriptions: Dict[str, str] = field(repr=False)
 
     def __post_init__(self):
         self.full_name = f'"{self.schema}"."{self.name}"'

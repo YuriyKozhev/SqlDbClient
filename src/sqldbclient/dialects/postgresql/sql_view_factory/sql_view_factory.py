@@ -6,7 +6,7 @@ import pandas as pd
 from sqldbclient.dialects.postgresql.sql_view_factory.view import View, ViewType
 from sqldbclient.dialects.postgresql.sql_view_factory.pg_info_queries import PG_VIEWS_INFO_TEMPLATE, \
     PG_OBJECT_DEPENDENCIES_TEMPLATE, PG_OBJECT_INDEXES_TEMPLATE, PG_MATVIEWS_INFO_TEMPLATE, \
-    PG_OBJECT_PRIVILEGES_TEMPLATE
+    PG_OBJECT_PRIVILEGES_TEMPLATE, PG_OBJECT_DESCRIPTIONS_TEMPLATE
 from sqldbclient.sql_executor import SqlExecutor
 
 logger = logging.getLogger(__name__)
@@ -104,6 +104,11 @@ class SqlViewFactory:
         df = self.sql_executor.execute(PG_OBJECT_PRIVILEGES_TEMPLATE.substitute(name=self.name, schema=self.schema))
         self.parameters.update(df.set_index('grantee').to_dict())
 
+    def _get_descriptions(self) -> None:
+        df = self.sql_executor.execute(PG_OBJECT_DESCRIPTIONS_TEMPLATE.format(name=self.name, schema=self.schema))
+        self.parameters['table_description'] = df.iloc[0]['table_description']
+        self.parameters['col_descriptions'] = df.iloc[0]['col_descriptions']
+
     @staticmethod
     def _extract_main_parameters(result: pd.DataFrame) -> dict:
         if len(result) > 1:
@@ -139,5 +144,6 @@ class SqlViewFactory:
         self._get_privileges()
         self._get_dependant_objects()
         self._get_indexes()
+        self._get_descriptions()
         view_object = View(**self.parameters)
         return view_object
